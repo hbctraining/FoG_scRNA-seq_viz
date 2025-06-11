@@ -27,10 +27,11 @@ Regardless of the analysis being done, conclusions about a population based on a
 
 **Highlight experimental considerations: replicates, pooling, batching**
 
-**Should we mention cellRanger and/or include a cliff-knee plot?**
 
+# Raw data processing
+**Should we mention cellRanger and/or include a cliff-knee plot?** Yes, add to this section
 
-# Quality control of aligned scRNA-seq data
+# Quality control
 
 <p align="center">
 <img src="img/sc_workflow_2022.jpg" width="630">
