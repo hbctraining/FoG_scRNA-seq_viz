@@ -20,7 +20,7 @@ Something about how important data visualization is to performing a high-quality
 # Quality control of aligned scRNA-seq data
 
 <p align="center">
-<img src="./img/sc_workflow_2022.jpg" width="630">
+<img src="img/sc_workflow_2022.jpg" width="630">
 </p>
 
 _**Goals:**_ 
