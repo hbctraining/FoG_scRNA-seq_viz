@@ -20,7 +20,7 @@ Something about how important data visualization is to performing a high-quality
 # Quality control of aligned scRNA-seq data
 
 <p align="center">
-<img src="../img/sc_workflow_2022.jpg" width="630">
+<img src="./img/sc_workflow_2022.jpg" width="630">
 </p>
 
 _**Goals:**_ 
@@ -74,7 +74,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="../img/cell_counts.png" width="600">
+<img src="./img/cell_counts.png" width="600">
 </p>
 
 We see over 15,000 cells per sample, which is quite a bit more than the 12-13,000 expected. It is clear that we likely have some junk 'cells' present.
@@ -95,7 +95,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="../img/nUMIs.png" width="600">
+<img src="./img/nUMIs.png" width="600">
 </p>
 
 We can see that majority of our cells in both samples have 1000 UMIs or greater, which is great. 
@@ -197,7 +197,7 @@ After deciding on our quality thresholds and filtering the data, we would re-run
 # Normalization
 
 <p align="center">
-<img src="../img/seurat_norm_integ_AMP/sc_workflow_2022.jpg" width="630">
+<img src="./img/sc_workflow_2022.jpg" width="630">
 </p>
 
 _**Goals:**_ 
@@ -223,7 +223,7 @@ Each cell in scRNA-seq will have a differing number of reads associated with it.
 In the example below, each gene appears to have doubled in expression in cell 2, however this is a consequence of cell 2 having twice the sequencing depth.
 
 <p align="center">
-<img src="../img/seurat_norm_integ_AMP/sequencing_depth.png" width="400">
+<img src="./img/sequencing_depth.png" width="400">
 </p>
 
 To move forward with normalization, we need to decide whether there are any large sources of uninteresting variation that we would like to remove, including cell cycle differences or mitochondrial gene expression. To do this we explore the PCA plots of the genes associated with these sources.
@@ -237,7 +237,7 @@ After performing the normalization and regressing out any large sources of varia
 # Integration
 
 <p align="center">
-<img src="../img/seurat_norm_integ_AMP/sc_workflow_2022.jpg" width="630">
+<img src="./img/sc_workflow_2022.jpg" width="630">
 </p>
 
 ***
@@ -261,7 +261,7 @@ _**Recommendations:**_
 Generally, we always look at our clustering **without integration** before deciding whether we need to perform any alignment. **Do not just always perform integration because you think there might be differences - explore the data.** If we had performed the normalization on both conditions together in a Seurat object and visualized the similarity between cells, we would have seen condition-specific clustering:
 
 <p align="center">
-<img src="../img/seurat_norm_integ_AMP/unintegrated_umap.png" width="400">
+<img src="./img/unintegrated_umap.png" width="400">
 </p>
 
 Condition-specific clustering of the cells indicates that we need to integrate the cells across conditions to ensure that cells of the same cell type cluster together. 
@@ -288,7 +288,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="../img/seurat_norm_integ_AMP/SC_umap_split.png" width="600">
+<img src="./img/SC_umap_split.png" width="600">
 </p>
 
 # Clustering cells
