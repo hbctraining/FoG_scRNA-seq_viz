@@ -42,14 +42,6 @@ _**Goals:**_
  - _To **filter the data to only include true cells that are of high quality**, so that when we cluster our cells it is easier to identify distinct cell type populations_
  - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to, trying to understand why the sample failed_
 
-_**Challenges:**_
- 
- - _Delineating cells that are **poor quality from less complex cells**_
- - _Choosing appropriate thresholds for filtering, so as to **keep high quality cells without removing biologically relevant cell types**_
-
-_**Recommendations:**_
- 
- - _Have a good idea of your expectations for the **cell types to be present** prior to performing the QC. For instance, do you expect to have low complexity cells or cells with higher levels of mitochondrial expression in your sample? If so, then we need to account for this biology when assessing the quality of our data._
 
 ## Assessing the quality metrics
 
