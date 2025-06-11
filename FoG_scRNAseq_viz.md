@@ -11,6 +11,19 @@ Something about how important data visualization is to performing a high-quality
 # scRNA-seq workflow and prep
 
 **Introduce the workflow very quickly**
+<img src="../img/scRNA-seq_steps_image.jpg" width="800">
+
+_**Image credit:** Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)_
+
+The steps of the workflow are:
+
+- **Generation of the count matrix (method-specific steps):** formating reads, demultiplexing samples, mapping and quantification
+- **Quality control of the raw counts:** filtering of poor quality cells 
+- **Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters)
+- **Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating known cell type clusters
+- **Optional downstream steps**
+
+Regardless of the analysis being done, conclusions about a population based on a single sample per condition are not trustworthy. **BIOLOGICAL REPLICATES ARE STILL NEEDED!** That is, if you want to make conclusions that correspond to the population and not just the single sample. 
 
 **Highlight experimental considerations: replicates, pooling, batching**
 
