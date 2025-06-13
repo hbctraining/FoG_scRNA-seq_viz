@@ -4,12 +4,12 @@ _**By: Mary Piper (Pfizer) and Meeta Mistry (Harvard Chan Bioinformatics Core)**
 
 _**Materials adapted from the [Harvard Chan Bioinformatics Core's single-cell RNA-seq workshop](https://hbctraining.github.io/Intro-to-scRNAseq/schedule/links-to-lessons.html)**_
 
-# Introduction
+## Introduction
 Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because it enables researchers to interpret complex, high-dimensional datasets in an intuitive and accessible way. When evaluating the quality of the data, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.
 
 In this short tutorial, we will highlight some key visualizations that are should be considered when performing a singel cell RNA-seq analysis.
 
-# scRNA-seq workflow and prep
+## scRNA-seq Workflow
 
 In the figure below, a general overview is presented outlining the specific steps of the single cell RNA-seq workflow. The main steps include:
 
@@ -20,7 +20,7 @@ In the figure below, a general overview is presented outlining the specific step
 - **Optional downstream steps**: differential expression analysis, trajectory inference, composition analysis
 
 <p align="center">
-<img src="img/scRNA-seq_steps_image.jpg" width="800">
+<img src="img/scRNA-seq_steps_image.jpg" width="700">
 </p>
 
 _**Image credit:** Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)_
@@ -32,16 +32,29 @@ _**Image credit:** Luecken, MD and Theis, FJ. Current best practices in single�
 >
 
 
-# Quality control
+## Quality control
 
 _**Goals:**_ 
  
  - _To **filter the data to only include true cells that are of high quality**, so that when we cluster our cells it is easier to identify distinct cell type populations_
  - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to, trying to understand why the sample failed_
 
-## Sequencing read quality assessment
+### Sequencing read quality
+A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacst a ensure robust downstream analyses. Some examples of these include:
 
-## Assessing the quality metrics
+Read Quality Scores: Evaluate the accuracy of base calling across sequences (e.g., average Phred score).
+Mapping Rate: The percentage of reads that align successfully to the reference genome or transcriptome.
+Fraction of Mitochondrial Reads: High mitochondrial reads may indicate stressed or dying cells.
+Number of Genes Detected: Measures transcriptome coverage per cell, reflecting library complexity.
+Number of UMIs (Unique Molecular Identifiers) per Cell: Indicates the number of unique RNA molecules captured.
+Fraction of Reads in Cells: Assesses how many reads are assigned to real cells versus background or empty droplets.
+Duplicate Reads: Percentage of PCR or sequencing duplicates removed, indicating library diversity.
+
+<p align="center">
+<img src="img/barcode_rank_plot.png" width="500">
+</p>
+
+### Assessing the quality metrics
 
 To determine low quality cells that should be removed from the analysis, various metrics are assessed:
 
