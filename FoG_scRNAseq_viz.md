@@ -5,43 +5,41 @@ _**By: Mary Piper (Pfizer) and Meeta Mistry (Harvard Chan Bioinformatics Core)**
 _**Materials adapted from the [Harvard Chan Bioinformatics Core's single-cell RNA-seq workshop](https://hbctraining.github.io/Intro-to-scRNAseq/schedule/links-to-lessons.html)**_
 
 # Introduction
+Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because it enables researchers to interpret complex, high-dimensional datasets in an intuitive and accessible way. When evaluating the quality of the data, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.
 
-Something about how important data visualization is to performing a high-quality analysis.
+In this short tutorial, we will highlight some key visualizations that are should be considered when performing a singel cell RNA-seq analysis.
 
 # scRNA-seq workflow and prep
 
-**Introduce the workflow very quickly**
-<img src="../img/scRNA-seq_steps_image.jpg" width="800">
+In the figure below, a general overview is presented outlining the specific steps of the single cell RNA-seq workflow. The main steps include:
 
-_**Image credit:** Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)_
-
-The steps of the workflow are:
-
-- **Generation of the count matrix (method-specific steps):** formating reads, demultiplexing samples, mapping and quantification
+- **Generation of the count matrix (method-specific steps):** formatting reads, demultiplexing samples, mapping and quantification
 - **Quality control of the raw counts:** filtering of poor quality cells 
 - **Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters)
 - **Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating known cell type clusters
-- **Optional downstream steps**
-
-Regardless of the analysis being done, conclusions about a population based on a single sample per condition are not trustworthy. **BIOLOGICAL REPLICATES ARE STILL NEEDED!** That is, if you want to make conclusions that correspond to the population and not just the single sample. 
-
-**Highlight experimental considerations: replicates, pooling, batching**
-
-
-# Raw data processing
-**Should we mention cellRanger and/or include a cliff-knee plot?** Yes, add to this section
-
-# Quality control
+- **Optional downstream steps**: differential expression analysis, trajectory inference, composition analysis
 
 <p align="center">
-<img src="img/sc_workflow_2022.jpg" width="630">
+<img src="img/scRNA-seq_steps_image.jpg" width="800">
 </p>
+
+_**Image credit:** Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)_
+
+> **NOTE:** Not included in the workflow above, **but equally, if not more important** are the **experimental design considerations**! As you begin to think about your single cell experiment, ask yourself the following:
+> 1. Do you absolutely need single cell resolution? Would a FACS sort + bulk RNA-seq analysis suffice for the biological question?
+> 2. Do you have biological replicates? Conclusions about a population of cells based on a single sample per condition are not trustworthy. **Biological replicates are necessary!**
+> 3. Do you have batch effects? Best practice is to design the experiment in a way such that **technical variability is minimized between samples**. However, with large sample sizes it is impossible to prepare everything at once and so it is recommended to split replicates across batches. Also, be sure to ktrack all sample-level metadata as it can be helpful in interpretation of results.
+>
+
+
+# Quality control
 
 _**Goals:**_ 
  
  - _To **filter the data to only include true cells that are of high quality**, so that when we cluster our cells it is easier to identify distinct cell type populations_
  - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to, trying to understand why the sample failed_
 
+## Sequencing read quality assessment
 
 ## Assessing the quality metrics
 
