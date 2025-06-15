@@ -40,7 +40,7 @@ _**Goals:**_
  - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to, trying to understand why the sample failed_
 
 ### Sequencing read quality
-A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacst a ensure robust downstream analyses. Some examples of these include:
+A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacts and ensure robust downstream analyses. Some examples of these include:
 
 Read Quality Scores: Evaluate the accuracy of base calling across sequences (e.g., average Phred score).
 Mapping Rate: The percentage of reads that align successfully to the reference genome or transcriptome.
