@@ -10,8 +10,6 @@ Visualization methods are critical when analyzing single-cell RNA sequencing (sc
 In this short tutorial, we will highlight some key visualizations that are should be considered when performing a single cell RNA-seq analysis.
 
 # scRNA-seq Workflow
-
-
 In the figure below, a general overview is presented outlining the specific steps of the single cell RNA-seq workflow. The main steps include:
 
 - **Generation of the count matrix (method-specific steps):** formatting reads, demultiplexing samples, mapping and quantification
@@ -99,25 +97,8 @@ metadata %>%
 We see over 15,000 cells per sample, which is quite a bit more than the 12-13,000 expected. It is clear that we likely have some junk 'cells' present.
 
 ### UMI counts per cell
-
 The UMI counts per cell should generally be above 500, that is the low end of what we expect. If UMI counts are between 500-1000 counts, it is usable but the cells probably should have been sequenced more deeply. 
 
-```r
-# Visualize the number UMIs/transcripts per cell
-metadata %>% 
-  	ggplot(aes(color=sample, x=nUMI, fill= sample)) + 
-  	geom_density(alpha = 0.2) + 
-  	scale_x_log10() + 
-  	theme_classic() +
-  	ylab("Cell density") +
-  	geom_vline(xintercept = 500)
-```
-
-<p align="center">
-<img src="img/nUMIs.png" width="500">
-</p>
-
-We can see that majority of our cells in both samples have 1000 UMIs or greater, which is great. 
 
 ### Genes detected per cell
 We have similar expectations for gene detection as for UMI detection, although it may be a bit lower than UMIs. For high quality data, the proportional histogram should contain **a single large peak that represents cells that were encapsulated**. 
@@ -165,7 +146,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="img/UMI_vs_genes_updated.png" width="45000">
+<img src="img/UMI_vs_genes_updated.png" width="450">
 </p>
 
 Good cells will generally exhibit both higher number of genes per cell and higher numbers of UMIs (upper right quadrant of the plot). Cells that are **poor quality are likely to have low genes and UMIs per cell**, and correspond to the data points in the bottom left quadrant of the plot. With this plot we also evaluate the **slope of the line**, and any scatter of data points in the **bottom right hand quadrant** of the plot. These cells have a high number of UMIs but only a few number of genes. These could be dying cells, but also could represent a population of a low complexity celltype (i.e red blood cells).
