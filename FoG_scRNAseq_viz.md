@@ -88,7 +88,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="img/cell_counts.png" width="600">
+<img src="img/cell_counts.png" width="500">
 </p>
 
 We see over 15,000 cells per sample, which is quite a bit more than the 12-13,000 expected. It is clear that we likely have some junk 'cells' present.
@@ -109,14 +109,15 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="img/nUMIs.png" width="600">
+<img src="img/nUMIs.png" width="500">
 </p>
 
 We can see that majority of our cells in both samples have 1000 UMIs or greater, which is great. 
 
 ### Genes detected per cell
+We have similar expectations for gene detection as for UMI detection, although it may be a bit lower than UMIs. For high quality data, the proportional histogram should contain **a single large peak that represents cells that were encapsulated**. 
 
-We have similar expectations for gene detection as for UMI detection, although it may be a bit lower than UMIs. For high quality data, the proportional histogram should contain **a single large peak that represents cells that were encapsulated**. If we see a **small shoulder** to the left of the major peak (not present in our data), or a bimodal distribution of the cells, that can indicate a couple of things. It might be that there are a set of **cells that failed** for some reason. It could also be that there are **biologically different types of cells** (i.e. quiescent cell populations, less complex cells of interest), and/or one type is much smaller than the other (i.e. cells with high counts may be cells that are larger in size). Therefore, this threshold should be assessed with other metrics that we describe in this lesson.
+If we see a **small shoulder** to the left of the major peak (not present in our data), or a bimodal distribution of the cells, that can indicate a couple of things. It might be that there are a set of **cells that failed** for some reason. It could also be that there are **biologically different types of cells** (i.e. quiescent cell populations, less complex cells of interest), and/or one type is much smaller than the other (i.e. cells with high counts may be cells that are larger in size). Therefore, this threshold should be assessed with other metrics.
  
 
 ```r
@@ -136,20 +137,6 @@ metadata %>%
 
 ### Fraction of reads mapping to mitochondrial genes
 This metric can identify whether there is a large amount of **mitochondrial contamination from dead or dying cells**. We define poor quality samples for mitochondrial counts as cells which surpass the 0.2 mitochondrial ratio mark, unless of course you are expecting this in your sample.
-
-```r
-# Visualize the distribution of mitochondrial gene expression detected per cell
-metadata %>% 
-  	ggplot(aes(color=sample, x=mitoRatio, fill=sample)) + 
-  	geom_density(alpha = 0.2) + 
-  	scale_x_log10() + 
-  	theme_classic() +
-  	geom_vline(xintercept = 0.2)
-```
-
-<p align="center">
-<img src="img/mitoRatio.png" width="600">
-</p>
 
 ### Joint filtering
 Considering any of these QC metrics in isolation can lead to misinterpretation of cellular signals. For example, cells with a comparatively high fraction of mitochondrial counts may be involved in respiratory processes and may be cells that you would like to keep. Likewise, other metrics can have other biological interpretations.  A general rule of thumb when performing QC is to **set thresholds for individual metrics to be as permissive as possible, and always consider the joint effects** of these metrics. In this way, you reduce the risk of filtering out any viable cell populations. 
@@ -173,7 +160,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="img/UMI_vs_genes_updated.png" width="600">
+<img src="img/UMI_vs_genes_updated.png" width="45000">
 </p>
 
 Good cells will generally exhibit both higher number of genes per cell and higher numbers of UMIs (upper right quadrant of the plot). Cells that are **poor quality are likely to have low genes and UMIs per cell**, and correspond to the data points in the bottom left quadrant of the plot. With this plot we also evaluate the **slope of the line**, and any scatter of data points in the **bottom right hand quadrant** of the plot. These cells have a high number of UMIs but only a few number of genes. These could be dying cells, but also could represent a population of a low complexity celltype (i.e red blood cells).
@@ -184,25 +171,15 @@ After deciding on our quality thresholds and filtering the data, we would re-run
 
 
 # Normalization
-
-<p align="center">
-<img src="img/sc_workflow_2022.jpg" width="630">
-</p>
+Paragraph here on normalizing...
 
 _**Goals:**_ 
  
  - _To accurately **normalize the gene expression values** to account for differences in sequencing depth and overdispersed count values._
  - _To **identify the most variant genes** likely to be indicative of the different cell types present._
-
-_**Challenges:**_
- 
  - _**Checking and removing unwanted variation** so that we do not have cells clustering by artifacts downstream_
 
-_**Recommendations:**_
- 
- - _Have a good idea of your expectations for the **cell types to be present** prior to performing the clustering. Know whether you expect cell types of low complexity or higher mitochondrial content AND whether the cells are differentiating_
- - _**Regress out** number of UMIs (default using sctransform), mitochondrial content, and cell cycle, if needed and appropriate for experiment, so not to drive clustering downstream_
- 
+
 ***
 
 An essential first step in the majority of mRNA expression analyses is normalization, whereby systematic variations are adjusted for to **make expression counts comparable across genes and cells**. The counts of mapped reads for each gene is proportional to the expression of RNA ("interesting") in addition to many other factors ("uninteresting"). Normalization is the process of adjusting raw count values to account for the "uninteresting" factors. 
@@ -216,6 +193,12 @@ In the example below, each gene appears to have doubled in expression in cell 2,
 </p>
 
 To move forward with normalization, we need to decide whether there are any large sources of uninteresting variation that we would like to remove, including cell cycle differences or mitochondrial gene expression. To do this we explore the PCA plots of the genes associated with these sources.
+
+_**Recommendations:**_
+ 
+ - _Have a good idea of your expectations for the **cell types to be present** prior to performing the clustering. Know whether you expect cell types of low complexity or higher mitochondrial content AND whether the cells are differentiating_
+ - _**Regress out** number of UMIs (default using sctransform), mitochondrial content, and cell cycle, if needed and appropriate for experiment, so not to drive clustering downstream_
+ 
 
 **Plots for cell cycle and/or mitochondrial ratio.**
 
