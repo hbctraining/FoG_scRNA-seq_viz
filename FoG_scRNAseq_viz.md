@@ -155,8 +155,6 @@ _**Goals:**_
 
  - _To **align same cell types** so as not to have clustering downstream driven by differences between samples, conditions, modalities, or batches._
 
-***
-
 ## To integrate or not to integrate?
 
 Generally, we always look at our clustering **without integration** before deciding whether we need to perform any alignment. **Do not just always perform integration because you think there might be differences - explore the data.** If we had performed the normalization on both conditions together in a Seurat object and visualized the similarity between cells, we would have seen condition-specific clustering:
