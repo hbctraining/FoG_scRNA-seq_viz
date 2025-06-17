@@ -190,7 +190,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="../img/SC_umap_split_int_SCTv2.png" width="600">
+<img src="img/SC_umap_split_int_SCTv2.png" width="600">
 </p>
 
 # Clustering cells
@@ -341,7 +341,7 @@ DimPlot(object = seurat_integrated,
 ```
 
 <p align="center">
-<img src="../img/umap_labeled_SCTv2.png" width="800">
+<img src="img/umap_labeled_SCTv2.png" width="800">
 </p>
 
 - Experimentally validate intriguing markers for our identified cell types.
