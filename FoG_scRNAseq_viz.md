@@ -16,8 +16,8 @@ In the figure below, a general overview is presented outlining the specific step
 
 - **Generation of the count matrix (method-specific steps):** formatting reads, demultiplexing samples, mapping and quantification
 - **Quality control of the raw counts:** filtering of poor quality cells
-- **Normalization and exploring unwanted variation**:
-- **Integration:**
+- **Normalization and exploring unwanted variation**: identifying highly variable genes/features, stabilizing variance, data exploration
+- **Integration (batch correction):**
 - **Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters)
 - **Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating known cell type clusters
 - **Optional downstream steps**: differential expression analysis, trajectory inference, composition analysis
