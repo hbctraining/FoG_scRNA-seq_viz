@@ -175,7 +175,7 @@ To integrate, we will use the shared highly variable genes (identified using SCT
 Different types of methods for integration exist....after we finished, we would visualize the aligned data in a UMAP to ensure proper alignment across our samples.
 
 ```r
-# Plot UMAP split by sample
+# Plot UMAP
 DimPlot(seurat_integrated)  
 ```
 
@@ -189,6 +189,9 @@ DimPlot(seurat_integrated,
         split.by = "sample")  
 ```
 
+<p align="center">
+<img src="../img/SC_umap_split_int_SCTv2.png" width="600">
+</p>
 
 # Clustering cells
 
