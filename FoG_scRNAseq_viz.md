@@ -129,16 +129,7 @@ _**Goals:**_
  
  - _To accurately **normalize the gene expression values** to account for differences in sequencing depth and overdispersed count values._
  - _To **identify the most variant genes** likely to be indicative of the different cell types present._
-
-_**Challenges:**_
- 
- - _**Checking and removing unwanted variation** so that we do not have cells clustering by artifacts downstream_
-
-_**Recommendations:**_
- 
- - _Have a good idea of your expectations for the **cell types to be present** prior to performing the clustering. Know whether you expect cell types of low complexity or higher mitochondrial content AND whether the cells are differentiating_
- - _**Regress out** number of UMIs (default using sctransform), mitochondrial content, and cell cycle, if needed and appropriate for experiment, so not to drive clustering downstream_
- 
+   
 ***
 
 An essential first step in the majority of mRNA expression analyses is normalization, whereby systematic variations are adjusted for to **make expression counts comparable across genes and cells**. The counts of mapped reads for each gene is proportional to the expression of RNA ("interesting") in addition to many other factors ("uninteresting"). Normalization is the process of adjusting raw count values to account for the "uninteresting" factors. 
@@ -153,31 +144,26 @@ In the example below, each gene appears to have doubled in expression in cell 2,
 
 To move forward with normalization, we need to decide whether there are any large sources of uninteresting variation that we would like to remove, including cell cycle differences or mitochondrial gene expression. To do this we explore the PCA plots of the genes associated with these sources.
 
-**Plots for cell cycle and/or mitochondrial ratio.**
+```r
+# Plot the PCA colored by cell cycle phase
+DimPlot(seurat_phase,
+        reduction = "pca",
+        group.by= "Phase",
+        split.by = "Phase")
+```
 
-**Any other plots desired?**
+<p align="center">
+<img src="img/pre_phase_pca.png" width="800">
+</p>
+
 
 After performing the normalization and regressing out any large sources of variation due to cell cycle and/or mitochondrial ratio, we can decide whether we need to perform integration.
 
 # Integration
 
-<p align="center">
-<img src="img/sc_workflow_2022.jpg" width="630">
-</p>
-
-***
-
 _**Goals:**_ 
 
- - _To **align same cell types** across conditions._
-
-_**Challenges:**_
- 
- - _**Aligning cells of similar cell types** so that we do not have clustering downstream due to differences between samples, conditions, modalities, or batches_
-
-_**Recommendations:**_
- 
- - _Go through the analysis without integration first to determine whether integration is necessary_
+ - _To **align same cell types** so as not to have clustering downstream driven by differences between samples, conditions, modalities, or batches._
 
 ***
 
@@ -205,7 +191,6 @@ Different types of methods for integration exist....after we finished, we would 
 DimPlot(seurat_integrated)  
 ```
 
-
 ```r
 # Plot UMAP split by sample
 DimPlot(seurat_integrated,
@@ -218,14 +203,148 @@ DimPlot(seurat_integrated,
 
 # Clustering cells
 
-**Heatmap or elbow plot?**
+Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected ‘quasi-cliques’ or ‘communities’ [[Seurat - Guided Clustering Tutorial](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)]. A nice in-depth description of clustering methods is provided in the [SVI Bioinformatics and Cellular Genomics Lab course](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html).
 
-**UMAP**
+The `resolution` is an important argument that sets the "granularity" of the downstream clustering and will need to be optimized for every individual experiment.  For datasets of 3,000 - 5,000 cells, the `resolution` set between `0.4`-`1.4` generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets. 
 
-# Identification of cell types
+To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful. The most popular methods include [t-distributed stochastic neighbor embedding (t-SNE)](https://kb.10xgenomics.com/hc/en-us/articles/217265066-What-is-t-Distributed-Stochastic-Neighbor-Embedding-t-SNE-) and [Uniform Manifold Approximation and Projection (UMAP)](https://umap-learn.readthedocs.io/en/latest/index.html) techniques. 
 
-**Plotting known markers: UMAP, FeaturePlot, DotPlot**
+Both methods aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization, we suggest using the same number of PCs as input to the clustering analysis. Here, we will proceed with the [UMAP method](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html) for visualizing the clusters.
 
-**Marker ID**
+```r
+# Assign identity of clusters
+Idents(object = seurat_integrated) <- "integrated_snn_res.0.8"
+```
 
-**Cell type-assigned UMAP**
+```r
+# Plot the UMAP
+DimPlot(seurat_integrated,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6)
+```
+
+<p align="center">
+<img src="img/SC_umap_SCTv2.png" width="800">
+</p>
+
+
+# Cluster QC and identification of cell types
+
+_**Goals:**_ 
+ 
+ - _To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content._
+ - _To use known cell type marker genes to **determine the identities of the clusters**._
+
+***
+
+To determine whether our clusters might be due to artifacts such as cell cycle phase or mitochondrial expression, it can be useful to explore these metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. However, if enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the cell type. 
+
+```r
+# Extract identity and sample information from seurat object to determine the number of cells per cluster per sample
+n_cells <- FetchData(seurat_integrated, 
+                     vars = c("ident", "sample")) %>%
+        dplyr::count(ident, sample)
+
+# Barplot of number of cells per cluster by sample
+ggplot(n_cells, aes(x=ident, y=n, fill=sample)) +
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_text(aes(label=n), vjust = -.2, position=position_dodge(1))
+```
+
+<p align="center">
+<img src="img/cluster_ncells.png" width="800">
+</p>
+
+Next we will explore additional metrics, such as the number of UMIs and genes per cell, S-phase and G2M-phase markers, and mitochondrial gene expression by UMAP. Looking at the individual S and G2M scores can give us additional information to checking the phase as we did previously.
+
+```r
+# Determine metrics to plot present in seurat_integrated@meta.data
+metrics <-  c("nUMI", "nGene", "S.Score", "G2M.Score", "mitoRatio")
+
+FeaturePlot(seurat_integrated, 
+            reduction = "umap", 
+            features = metrics,
+            pt.size = 0.4, 
+            order = TRUE,
+            min.cutoff = 'q10',
+            label = TRUE)
+```
+
+<p align="center">
+<img src="img/SC_metrics_umpa_loadObj_SCTv2.png" width="800">
+</p>
+
+With the cells clustered, we can explore the cell type identities by looking for known markers. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. 
+
+**CD14+ monocyte markers**
+
+```r
+FeaturePlot(seurat_integrated, 
+            reduction = "umap", 
+            features = c("CD14", "LYZ"), 
+            order = TRUE,
+            min.cutoff = 'q10', 
+            label = TRUE)
+```
+
+<p align="center">
+<img src="img/CD14_monocytes_SCTv2.png" width="800">
+</p>
+
+
+```r
+# List of known celltype markers
+markers <- list()
+markers[["CD14+ monocytes"]] <- c("CD14", "LYZ")
+markers[["FCGR3A+ monocyte"]] <- c("FCGR3A", "MS4A7")
+markers[["Macrophages"]] <- c("MARCO", "ITGAM", "ADGRE1")
+markers[["Conventional dendritic"]] <- c("FCER1A", "CST3")
+markers[["Plasmacytoid dendritic"]] <- c("IL3RA", "GZMB", "SERPINF1", "ITM2C")
+
+# Create dotplot based on RNA expression
+DotPlot(seurat_integrated, markers, assay="RNA")
+```
+
+<p align="center">
+<img src="img/dotplot_cluster_markers.png" width="1000">
+</p>
+
+
+After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers, and when we have identified the cell types, we can assign the cell type names to each cluster.
+
+We can then reassign the identity of the clusters to these cell types:
+
+```r
+# Rename all identities
+seurat_integrated <- RenameIdents(object = seurat_integrated, 
+                               "0" = "Naive or memory CD4+ T cells",
+                               "1" = "CD14+ monocytes",
+                               "2" = "Activated T cells",
+                               "3" = "CD14+ monocytes",
+                               "4" = "Stressed cells / Unknown",
+                               "5" = "CD8+ T cells",
+                               "6" = "Naive or memory CD4+ T cells",
+                               "7" = "B cells",
+                               "8" = "NK cells",
+                               "9" = "CD8+ T cells",
+                               "10" = "FCGR3A+ monocytes",
+                               "11" = "B cells",
+                               "12" = "NK cells",
+                               "13" = "B cells",
+                               "14" = "Conventional dendritic cells",
+                               "15" = "Megakaryocytes",
+			       "16" = "Plasmacytoid dendritic cells")
+
+
+# Plot the UMAP
+DimPlot(object = seurat_integrated, 
+        reduction = "umap", 
+        label = TRUE,
+        label.size = 3,
+        repel = TRUE)
+```
+
+<p align="center">
+<img src="../img/umap_labeled_SCTv2.png" width="800">
+</p>
