@@ -31,7 +31,8 @@ _**Image credit:** Luecken, MD and Theis, FJ. Current best practices in singleâ€
 > **NOTE:** Not included in the workflow above, **but equally, if not more important** are the **experimental design considerations**! As you begin to think about your single cell experiment, ask yourself the following:
 > 1. Do you absolutely need single cell resolution? Would a FACS sort + bulk RNA-seq analysis suffice for the biological question?
 > 2. Do you have biological replicates? Conclusions about a population of cells based on a single sample per condition are not trustworthy. **Biological replicates are necessary!**
-> 3. Do you have batch effects? Best practice is to design the experiment in a way such that **technical variability is minimized between samples**. However, with large sample sizes it is impossible to prepare everything at once and so it is recommended to split replicates across batches. Also, be sure to ktrack all sample-level metadata as it can be helpful in interpretation of results.
+>    * **Do not pool your biological replicates.** If you have limited tissue or very few cells, pool the same number of samples for every biological replicate.
+> 4. Do you have batch effects? Best practice is to design the experiment in a way such that **technical variability is minimized between samples**. However, with large sample sizes it is impossible to prepare everything at once and so it is recommended to split replicates across batches. Also, be sure to keep track all sample-level metadata as it can be helpful in interpretation of results.
 >
 
 
