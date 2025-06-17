@@ -109,7 +109,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="../img/nUMIs.png" width="600">
+<img src="img/nUMIs.png" width="600">
 </p>
 
 We can see that majority of our cells in both samples have 1000 UMIs or greater, which is great. 
@@ -131,7 +131,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="../img/genes_detected.png" width="600">
+<img src="img/genes_detected.png" width="600">
 </p>
 
 ### Fraction of reads mapping to mitochondrial genes
@@ -148,7 +148,7 @@ metadata %>%
 ```
 
 <p align="center">
-<img src="../img/mitoRatio.png" width="600">
+<img src="img/mitoRatio.png" width="600">
 </p>
 
 ### Joint filtering
