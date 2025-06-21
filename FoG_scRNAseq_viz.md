@@ -173,7 +173,7 @@ Before we make any comparisons across cells, we will **apply a simple normalizat
 
 To assign each cell a score based on its expression of G2/M and S phase markers, we have used the Seurat function `CellCycleScoring()`. This function calculates cell cycle phase scores based on canonical markers that required as input. After scoring the cells for cell cycle, we would like to **determine whether cell cycle is a major source of variation in our dataset using PCA**. 
 
-**LETS LOAD IN THE DATA (seurat_phase) IN WHICH A SIMPLE NORMALIZATION HAS BEEN APPLIED AND WHERE WE HAVE CELL CYCLE SCORES COMPUTED FOR EACH CELL.**
+**LETS LOAD IN THE DATA (seurat_phase) IN WHICH A SIMPLE NORMALIZATION HAS BEEN APPLIED AND WHERE WE HAVE CELL CYCLE SCORES COMPUTED FOR EACH CELL + Find variable genes + ScaleData.**
 
 ```r
 # Load in the Seurat object
@@ -182,25 +182,9 @@ seurat_phase <-
 ```
 
 ### Highly variable genes 
-To perform PCA, we need to **first choose the most variable features, then scale the data**. Since highly expressed genes exhibit the highest amount of variation and we don't want our 'highly variable genes' only to reflect high expression, we need to scale the data to scale variation with expression level. The Seurat `ScaleData()` function will scale the data by:
+To perform PCA, we need to **first choose the most variable features, then scale the data**. Since highly expressed genes exhibit the highest amount of variation and we don't want our 'highly variable genes' only to reflect high expression, we need to scale the data to scale variation with expression level. 
 
-* adjusting the expression of each gene to give a mean expression across cells to be 0
-* scaling expression of each gene to give a variance across cells to be 1
-
-```r
-# Identify the most variable genes
-seurat_phase <- FindVariableFeatures(seurat_phase, 
-                     selection.method = "vst",
-                     nfeatures = 2000, 
-                     verbose = FALSE)
-		     
-# Scale the counts
-seurat_phase <- ScaleData(seurat_phase)
-```
-
-> _**NOTE:** For the `selection.method` and `nfeatures` arguments the values specified are the default settings. Therefore, you do not necessarily need to include these in your code. We have included it here for transparency and inform you what you are using._	
-
-**Highly variable gene selection is extremely important** since many downstream steps are computed only on these genes. Seurat allows us to access the ranked highly variable genes with the `VariableFeatures()` function. We can additionally **visualize the dispersion of all genes using Seurat's `VariableFeaturePlot()`**, which shows a gene's average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the `LabelPoints()` helps us understand which genes will be driving shape of our data.
+Seurat allows us to access the ranked highly variable genes with the `VariableFeatures()` function. We can additionally **visualize the dispersion of all genes using Seurat's `VariableFeaturePlot()`**, which shows a gene's average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the `LabelPoints()` helps us understand which genes will be driving shape of our data.
 
 ```r
 # Identify the 15 most highly variable genes
@@ -258,6 +242,29 @@ Here, we have performed the PCA analysis using the most highly variable genes an
 	<img src="../img/cell_cycle_regressed.png" width="400">
 	</p>
 </details>
+
+## SCTransform
+
+In the [Hafemeister and Satija, 2019 paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1) the authors explored the issues with simple transformations. Specifically they evaluated the standard log normalization approach and found that:
+
+* genes with different abundances are affected differently and that **effective normalization (using the log transform) is only observed with low/medium abundance genes (Figure 1D, below)
+* substantial imbalances in variance were observed with the log-normalized data (Figure 1E, below)
+     * cells with low total UMI counts exhibited disproportionately higher variance for high-abundance genes, dampening the variance contribution from other gene abundances
+
+<p align="center">
+<img src="../img/SCT_Fig1.png" width="600">
+</p>
+
+_**Image credit:** Hafemeister C and Satija R. Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression, Genom Biology 2019 (https://doi.org/10.1101/576827)_
+
+The conclusion is, **we cannot treat all genes the same.**
+
+The proposed solution was the use of **Pearson residuals for transformation**, as implemented in Seurat's `SCTransform` function. With this approach:
+
+* Measurements are multiplied by a gene-specific weight
+* Each gene is weighted based on how much evidence there is that it is non-uniformly expressed across cells
+* More evidence == more of a weight; Genes that are expressed in only a small fraction of cells will be favored (useful for finding rare cell populations)
+* Not just a consideration of the expression level is, but also the distribution of expression
 
 
 # Integration
