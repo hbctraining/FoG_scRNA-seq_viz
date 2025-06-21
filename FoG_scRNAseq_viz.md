@@ -156,7 +156,7 @@ Good cells will generally exhibit both higher number of genes per cell and highe
 After deciding on our quality thresholds and filtering the data, we would re-run the plots to ensure good quality metrics post-filtering. Based on the quality filtering, we should now have true cells of high quality and identified any failed samples.
 
 
-# Normalization
+# Normalization and regressing out unwanted variation
 
 _**Goals:**_ 
  
@@ -165,30 +165,69 @@ _**Goals:**_
  - _**Checking and removing unwanted variation** so that we do not have cells clustering by artifacts downstream_
 
 
-
 An essential first step in the majority of mRNA expression analyses is normalization, whereby systematic variations are adjusted for to **make expression counts comparable across genes and cells**. The counts of mapped reads for each gene is proportional to the expression of RNA ("interesting") in addition to many other factors ("uninteresting"). Normalization is the process of adjusting raw count values to account for the "uninteresting" factors. 
 
-Each cell in scRNA-seq will have a differing number of reads associated with it. So to accurately compare expression between cells, it is necessary to normalize for sequencing depth. Accounting for sequencing depth is necessary for comparison of gene expression between cells. 
+Before we make any comparisons across cells, we will **apply a simple normalization.** This is solely for the purpose of exploring the sources of variation in our data.
 
-In the example below, each gene appears to have doubled in expression in cell 2, however this is a consequence of cell 2 having twice the sequencing depth.
+## Evaluating effects of cell cycle 
 
-<p align="center">
-<img src="img/sequencing_depth.png" width="400">
-</p>
+To assign each cell a score based on its expression of G2/M and S phase markers, we have used the Seurat function `CellCycleScoring()`. This function calculates cell cycle phase scores based on canonical markers that required as input. After scoring the cells for cell cycle, we would like to **determine whether cell cycle is a major source of variation in our dataset using PCA**. 
 
-To move forward with normalization, we need to decide whether there are any large sources of uninteresting variation that we would like to remove, including cell cycle differences or mitochondrial gene expression. To do this we explore the PCA plots of the genes associated with these sources.
-
-
-
-**Plots for cell cycle and/or mitochondrial ratio.**
-
-**Any other plots desired?**
-
-After performing the normalization and regressing out any large sources of variation due to cell cycle and/or mitochondrial ratio, we can decide whether we need to perform integration.
-
-# Integration
+**LETS LOAD IN THE DATA (seurat_phase) IN WHICH A SIMPLE NORMALIZATION HAS BEEN APPLIED AND WHERE WE HAVE CELL CYCLE SCORES COMPUTED FOR EACH CELL.**
 
 ```r
+# Load in the Seurat object
+seurat_phase <-
+
+```
+
+### Highly variable genes 
+To perform PCA, we need to **first choose the most variable features, then scale the data**. Since highly expressed genes exhibit the highest amount of variation and we don't want our 'highly variable genes' only to reflect high expression, we need to scale the data to scale variation with expression level. The Seurat `ScaleData()` function will scale the data by:
+
+* adjusting the expression of each gene to give a mean expression across cells to be 0
+* scaling expression of each gene to give a variance across cells to be 1
+
+```r
+# Identify the most variable genes
+seurat_phase <- FindVariableFeatures(seurat_phase, 
+                     selection.method = "vst",
+                     nfeatures = 2000, 
+                     verbose = FALSE)
+		     
+# Scale the counts
+seurat_phase <- ScaleData(seurat_phase)
+```
+
+> _**NOTE:** For the `selection.method` and `nfeatures` arguments the values specified are the default settings. Therefore, you do not necessarily need to include these in your code. We have included it here for transparency and inform you what you are using._	
+
+**Highly variable gene selection is extremely important** since many downstream steps are computed only on these genes. Seurat allows us to access the ranked highly variable genes with the `VariableFeatures()` function. We can additionally **visualize the dispersion of all genes using Seurat's `VariableFeaturePlot()`**, which shows a gene's average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the `LabelPoints()` helps us understand which genes will be driving shape of our data.
+
+```r
+# Identify the 15 most highly variable genes
+ranked_variable_genes <- VariableFeatures(seurat_phase)
+top_genes <- ranked_variable_genes[1:15]
+
+# Plot the average expression and variance of these genes
+# With labels to indicate which genes are in the top 15
+p <- VariableFeaturePlot(seurat_phase)
+LabelPoints(plot = p, points = top_genes, repel = TRUE)
+```
+
+<p align="center">
+<img src="img/hvg.png" width="600">
+</p>
+
+
+### PCA
+
+Principal Component Analysis (PCA) is a technique used to emphasize variation as well as similarity, and to bring out strong patterns in a dataset; it is one of the methods used for *"dimensionality reduction"*. 
+
+> **NOTE:** For a more **detailed explanation on PCA**, please [look over this lesson](05_theory_of_PCA.md) (adapted from StatQuests/Josh Starmer's YouTube video). We also strongly encourage you to explore the video [StatQuest's video](https://www.youtube.com/watch?v=_UVHneBUBW0) for a more thorough understanding. 
+
+```r
+# Perform PCA
+seurat_phase <- RunPCA(seurat_phase)
+
 # Plot the PCA colored by cell cycle phase
 DimPlot(seurat_phase,
         reduction = "pca",
@@ -202,7 +241,24 @@ DimPlot(seurat_phase,
 </p>
 
 
-After performing the normalization and regressing out any large sources of variation due to cell cycle and/or mitochondrial ratio, we can decide whether we need to perform integration.
+Here, we have performed the PCA analysis using the most highly variable genes and plotted the first two principal components against each other. We have also split the figure by cell cycle phase, to evaluate similarities and/or differences. **We do not see large differences due to cell cycle phase. Based on this plot, we would not regress out the variation due to cell cycle**.
+
+<details>
+	<summary><b><i>When should cell cycle phase be regressed out?</i></b></summary>
+	<br>Below are two PCA plots taken from the Seurat vignette dealing with <a href="https://satijalab.org/seurat/archive/v3.1/cell_cycle_vignette.html">Cell-Cycle Scoring and Regression</a>.<br>
+
+ 	<ul><li>This first plot is similar to what we plotted above, it is a PCA prior to regression to evaluate if the cell cycle is playing a big role in driving PC1 and PC2. Clearly, the cells are separating by cell type in this case, so the vignette suggests regressing out these effects.</li></ul>
+ 	<p align="center">
+ 	<img src="../img/cell_cycle_not_regressed.png" width="400">
+ 	</p>
+
+	<ul><li>This second PCA plot is <b>post-regression</b>, and displays how effective the regression was in removing the effect we observed.</li></ul>
+
+	<p align="center">
+	<img src="../img/cell_cycle_regressed.png" width="400">
+	</p>
+</details>
+
 
 # Integration
 
