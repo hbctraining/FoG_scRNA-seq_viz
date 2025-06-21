@@ -278,7 +278,7 @@ _**Goals:**_
 Generally, we always look at our clustering **without integration** before deciding whether we need to perform any alignment. **Do not just always perform integration because you think there might be differences - explore the data.** If we had performed the normalization on both conditions together in a Seurat object and visualized the similarity between cells, we would have seen condition-specific clustering:
 
 <p align="center">
-<img src="img/unintegrated_umap.png" width="400">
+<img src="img/unintegrated_umap.png" width="600">
 </p>
 
 Condition-specific clustering of the cells indicates that we need to integrate the cells across conditions to ensure that cells of the same cell type cluster together. 
@@ -315,7 +315,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/SC_umap_split_int_SCTv2.png" width="600">
+<img src="img/SC_umap_split_int_SCTv2.png" width="850">
 </p>
 
 # Clustering cells
@@ -329,7 +329,7 @@ Seurat uses a graph-based clustering approach using a K-nearest neighbor approac
 
 The `resolution` is an important argument that sets the "granularity" of the downstream clustering and will need to be optimized for every individual experiment.  For datasets of 3,000 - 5,000 cells, the `resolution` set between `0.4`-`1.4` generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets. 
 
-To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the [UMAP method](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html) for visualizing the clusters.
+To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the [UMAP method](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html) for **visualizing the clusters at a resolution of 0.8**.
 
 ```r
 # Assign identity of clusters
@@ -345,7 +345,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/SC_umap_SCTv2.png" width="800">
+<img src="img/SC_umap_SCTv2.png" width="600">
 </p>
 
 
@@ -356,9 +356,8 @@ _**Goals:**_
  - _To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content._
  - _To use known cell type marker genes to **determine the identities of the clusters**._
 
-***
 
-To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore these metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. However, if enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the cell type. 
+Let's begin by using a **barplot** to take a look at the **number of cells per cluster**, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.
 
 ```r
 # Extract identity and sample information from seurat object to determine the number of cells per cluster per sample
@@ -373,10 +372,13 @@ ggplot(n_cells, aes(x=ident, y=n, fill=sample)) +
 ```
 
 <p align="center">
-<img src="img/cluster_ncells.png" width="800">
+<img src="img/cluster_ncells.png" width="850">
 </p>
 
-Next we will explore additional metrics, such as the number of UMIs and genes per cell, S-phase and G2M-phase markers, and mitochondrial gene expression by UMAP. Looking at the individual S and G2M scores can give us additional information to checking the phase as we did previously.
+
+To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore various metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. If enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the particular cell type. 
+
+Next let's explore these metrics by overlaying them on the UMAP using a **FeaturePlot**: 
 
 ```r
 # Determine metrics to plot present in seurat_integrated@meta.data
@@ -394,6 +396,22 @@ FeaturePlot(seurat_integrated,
 <p align="center">
 <img src="img/SC_metrics_umpa_loadObj_SCTv2.png" width="800">
 </p>
+
+With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster. The corresponding UMAP is displayed for comparison:
+
+
+```r
+# Boxplot of nGene per cluster
+ggplot(seurat_integrated@meta.data) +
+    geom_boxplot(aes(x=integrated_snn_res.0.8, y=nGene, fill=integrated_snn_res.0.8)) +
+    NoLegend()
+```
+
+<p align="center">
+<img src="img/" width="800">
+</p>
+
+
 
 With the cells clustered, we can explore the cell type identities by looking for known markers. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. 
 
