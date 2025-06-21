@@ -408,7 +408,7 @@ ggplot(seurat_integrated@meta.data) +
 ```
 
 <p align="center">
-<img src="img/ngene_with_boxplotx.png" width="850">
+<img src="img/ngene_with_boxplotx.png" width="900">
 </p>
 
 ## Exploring known celltype markers
