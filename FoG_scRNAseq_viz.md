@@ -356,6 +356,7 @@ _**Goals:**_
  - _To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content._
  - _To use known cell type marker genes to **determine the identities of the clusters**._
 
+## Exploration of QC metrics
 
 Let's begin by using a **barplot** to take a look at the **number of cells per cluster**, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.
 
@@ -397,8 +398,7 @@ FeaturePlot(seurat_integrated,
 <img src="img/SC_metrics_umpa_loadObj_SCTv2.png" width="800">
 </p>
 
-With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster. The corresponding UMAP is displayed for comparison:
-
+With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster and more **quantitatively assess the differences**. The corresponding UMAP is displayed for comparison.
 
 ```r
 # Boxplot of nGene per cluster
@@ -408,14 +408,13 @@ ggplot(seurat_integrated@meta.data) +
 ```
 
 <p align="center">
-<img src="img/" width="800">
+<img src="img/ngene_with_boxplotx.png" width="850">
 </p>
 
+## Exploring known celltype markers
+We can explore the different clusters and best identify their cell type identities by looking at expression of known marker genes. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. In teh example below, **CD14+ monocyte markers** appear to correspond to clusters 1, and 3. We wouldn't include clusters 14 and 10 because they do not highly express both of these markers.
 
-
-With the cells clustered, we can explore the cell type identities by looking for known markers. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. 
-
-**CD14+ monocyte markers**
+### Feature Plot
 
 ```r
 FeaturePlot(seurat_integrated, 
@@ -430,6 +429,18 @@ FeaturePlot(seurat_integrated,
 <img src="img/CD14_monocytes_SCTv2.png" width="800">
 </p>
 
+### Violin plot
+We can also explore the range in expression of specific markers by using **violin plots**. Violin plots are similar to box plots, except that they **also show the probability density of the data at different values**, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the **full distribution of the data**. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.
+
+```r
+# Vln plot - CD14+ monocyte (need to run this code to create the image
+VlnPlot(object = seurat_integrated, 
+        features = c("CD14", "LYZ"))
+
+```
+
+### Dotplot
+While the above plot allows you to explore one celltype at a time, Seurat also has a built in **visualization tool which allows us to view the average expression of genes across clusters called DotPlot()**. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.
 
 ```r
 # List of known celltype markers
@@ -448,10 +459,8 @@ DotPlot(seurat_integrated, markers, assay="RNA")
 <img src="img/dotplot_cluster_markers.png" width="1000">
 </p>
 
-
-After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers, and when we have identified the cell types, we can assign the cell type names to each cluster.
-
-We can then reassign the identity of the clusters to these cell types:
+## Celltype assignment
+After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers. Once we have identified the cell types, we can **assign the cell type names to each cluster**.
 
 ```r
 # Rename all identities
@@ -484,7 +493,7 @@ DimPlot(object = seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/umap_labeled_SCTv2.png" width="800">
+<img src="img/umap_labeled_SCTv2.png" width="600">
 </p>
 
 - Experimentally validate intriguing markers for our identified cell types.
