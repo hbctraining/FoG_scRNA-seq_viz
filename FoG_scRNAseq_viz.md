@@ -411,7 +411,7 @@ ggplot(seurat_integrated@meta.data) +
 ```
 
 <p align="center">
-<img src="img/genes_per_cluster.png" width="900">
+<img src="img/genes_per_cluster.png" width="600">
 </p>
 
 ## Exploring known celltype markers
