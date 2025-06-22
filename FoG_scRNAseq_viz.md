@@ -308,7 +308,7 @@ DimPlot(seurat_integrated)
 ```
 
 <p align="center">
-<img src="img/SC_umap_split.png" width="600">
+<img src="img/integrated_dimplot.png" width="600">
 </p>
 
 ```r
@@ -318,7 +318,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/SC_umap_split_int_SCTv2.png" width="850">
+<img src="img/integrated_dimplot_split.png" width="850">
 </p>
 
 # Clustering cells
@@ -463,7 +463,7 @@ DotPlot(seurat_integrated, markers, assay="RNA")
 ```
 
 <p align="center">
-<img src="img/dotplot_cluster_markers.png" width="1000">
+<img src="img/dotplot_known_markers.png" width="1000">
 </p>
 
 ## Celltype assignment
@@ -505,8 +505,11 @@ DimPlot(object = seurat_integrated,
 <img src="img/annotated_UMAP.png" width="600">
 </p>
 
+After we have finished identifying cell types, often additional work is needed for validation or addressing additional questions. Some additional downstream work could include:
+
 - Experimentally validate intriguing markers for our identified cell types.
 - Explore a subset of the cell types to discover subclusters of cells as described [here](seurat_subclustering.md)
+- Differential expression analysis within a particular cell type or subcluster.
 - Trajectory analysis, or lineage tracing, could be performed if trying to determine the progression between cell types or cell states. For example, we could explore any of the following using this type of analysis:
 	- Differentiation processes
 	- Expression changes over time
