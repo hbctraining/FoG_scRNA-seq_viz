@@ -341,12 +341,14 @@ To visualize the cell clusters, there are a few different dimensionality reducti
 
 ```r
 # Assign identity of clusters
-Idents(object = seurat_integrated) <- "integrated_snn_res.0.8"
+seurat_clustered <- readRDS("data/clustering_integrated_seurat.rds")
+
+Idents(object = seurat_clustered) <- "integrated_snn_res.0.8"
 ```
 
 ```r
 # Plot the UMAP
-DimPlot(seurat_integrated,
+DimPlot(seurat_clustered,
         reduction = "umap",
         label = TRUE,
         label.size = 6)
@@ -370,7 +372,7 @@ Let's begin by using a **barplot** to take a look at the **number of cells per c
 
 ```r
 # Extract identity and sample information from seurat object to determine the number of cells per cluster per sample
-n_cells <- FetchData(seurat_integrated, 
+n_cells <- FetchData(seurat_clustered, 
                      vars = c("ident", "sample")) %>%
         dplyr::count(ident, sample)
 
@@ -393,7 +395,7 @@ Next let's explore these metrics by overlaying them on the UMAP using a **Featur
 # Determine metrics to plot present in seurat_integrated@meta.data
 metrics <-  c("nUMI", "nGene", "S.Score", "G2M.Score", "mitoRatio")
 
-FeaturePlot(seurat_integrated, 
+FeaturePlot(seurat_clustered, 
             reduction = "umap", 
             features = metrics,
             pt.size = 0.4, 
@@ -410,7 +412,7 @@ With the color scale of the FeaturePlots, it can be difficult to distinguish the
 
 ```r
 # Boxplot of nGene per cluster
-ggplot(seurat_integrated@meta.data) +
+ggplot(seurat_clustered@meta.data) +
     geom_boxplot(aes(x=integrated_snn_res.0.8, y=nGene, fill=integrated_snn_res.0.8)) +
     NoLegend()
 ```
@@ -425,7 +427,7 @@ We can explore the different clusters and best identify their cell type identiti
 ### Feature Plot
 
 ```r
-FeaturePlot(seurat_integrated, 
+FeaturePlot(seurat_clustered, 
             reduction = "umap", 
             features = c("CD14", "LYZ"), 
             order = TRUE,
@@ -441,10 +443,9 @@ FeaturePlot(seurat_integrated,
 We can also explore the range in expression of specific markers by using **violin plots**. Violin plots are similar to box plots, except that they **also show the probability density of the data at different values**, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the **full distribution of the data**. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.
 
 ```r
-# Vln plot - CD14+ monocyte (need to run this code to create the image
-VlnPlot(object = seurat_integrated, 
+# Violin plot - CD14+ monocyte
+VlnPlot(object = seurat_clustered, 
         features = c("CD14", "LYZ"))
-
 ```
 
 <p align="center">
@@ -464,7 +465,7 @@ markers[["Conventional dendritic"]] <- c("FCER1A", "CST3")
 markers[["Plasmacytoid dendritic"]] <- c("IL3RA", "GZMB", "SERPINF1", "ITM2C")
 
 # Create dotplot based on RNA expression
-DotPlot(seurat_integrated, markers, assay="RNA")
+DotPlot(seurat_clustered, markers, assay="RNA")
 ```
 
 <p align="center">
@@ -476,7 +477,7 @@ After identifying the majority of clusters using known cell type markers, we can
 
 ```r
 # Rename all identities
-seurat_integrated <- RenameIdents(object = seurat_integrated, 
+seurat_clustered <- RenameIdents(object = seurat_clustered, 
                                   "0" = "Naive or memory CD4+ T cells",
                                   "1" = "Activated T cells",
                                   "2" = "CD14+ monocytes",
@@ -499,7 +500,7 @@ seurat_integrated <- RenameIdents(object = seurat_integrated,
 
 
 # Plot the UMAP
-DimPlot(object = seurat_integrated, 
+DimPlot(object = seurat_clustered, 
         reduction = "umap", 
         label = TRUE,
         label.size = 3,
