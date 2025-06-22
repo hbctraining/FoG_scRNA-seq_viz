@@ -308,6 +308,7 @@ For this dataset, we applied CCA integration. To **evaluate the effect of integr
 
 ```r
 # Plot UMAP
+seurat_integrated <- readRDS("data/integrated_seurat.png")
 DimPlot(seurat_integrated)  
 ```
 
