@@ -5,19 +5,20 @@ _**By: Mary Piper (Pfizer) and Meeta Mistry (Harvard Chan Bioinformatics Core)**
 _**Materials adapted from the [Harvard Chan Bioinformatics Core's single-cell RNA-seq workshop](https://hbctraining.github.io/Intro-to-scRNAseq/schedule/links-to-lessons.html)**_
 
 # Introduction
-Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because it enables researchers to interpret complex, high-dimensional datasets in an intuitive and accessible way. When evaluating the quality of the data, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.
+Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because they enable researchers to interpret complex, high-dimensional datasets in an intuitive, interpretable, and accessible way. When evaluating the quality of the data, scatter plots, ridgeline plots, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.
 
 In this short tutorial, we will highlight some key visualizations that are should be considered when performing a single cell RNA-seq analysis.
 
 # scRNA-seq Workflow
-In the figure below, a general overview is presented outlining the specific steps of the single cell RNA-seq workflow. The main steps include:
+
+The single cell RNA-seq worklfow is comprised of multiple core steps required for a high-quality analysis. Other steps may be added throughout the workflow, if needed, but the core steps of the workflow include:
 
 - **Generation of the count matrix (method-specific steps):** formatting reads, demultiplexing samples, mapping and quantification
-- **Quality control of the raw counts:** filtering of poor quality cells
-- **Normalization and exploring unwanted variation**: identifying highly variable genes/features, stabilizing variance, data exploration
-- **Integration (batch correction):**
-- **Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters)
-- **Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating known cell type clusters
+- **Quality control of the raw counts:** identification and filtering of poor quality cells
+- **Normalization and exploring unwanted variation**: identifying highly variable genes/features, stabilizing variance, data exploration of potential sources of variation
+- **Integration (batch correction):** aligning cells across batches, samples, conditions, and/or modalities
+- **Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters) and exploration of QC metrics and expression levels of known marker genes for expected cell type populations
+- **Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating cell type clusters
 - **Optional downstream steps**: differential expression analysis, trajectory inference, composition analysis
 
 <p align="center">
@@ -39,9 +40,10 @@ _**Image credit:** Luecken, MD and Theis, FJ. Current best practices in singleâ€
 _**Goals:**_ 
  
  - _To **filter the data to only include true cells that are of high quality**, so that when we cluster our cells it is easier to identify distinct cell type populations_
- - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to, trying to understand why the sample failed_
+ - _To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to try to understand why the sample failed_
 
 ## Sequencing read quality
+
 A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacts and ensure robust downstream analyses. Some examples of these include:
 
 * **Mean Reads per Cell**: the total number of sequenced reads divided by the number of cells. 10X recommends a minimum of 20,000 read pairs per cell.
@@ -82,6 +84,7 @@ The cell numbers can also vary by protocol, **producing cell numbers that are mu
 ```r
 # Read in metadata
 metadata <- readRDS("data/QC_metadata.rds")
+
 # Visualize the number of cell counts per sample
 metadata %>% 
   	ggplot(aes(x=sample, fill=sample)) + 
@@ -175,11 +178,9 @@ Before we make any comparisons across cells, we will **apply a simple normalizat
 
 To assign each cell a score based on its expression of G2/M and S phase markers, we have used the Seurat function `CellCycleScoring()`. This function calculates cell cycle phase scores based on canonical markers that required as input. After scoring the cells for cell cycle, we would like to **determine whether cell cycle is a major source of variation in our dataset using PCA**. 
 
-**LETS LOAD IN THE DATA (seurat_phase) IN WHICH A SIMPLE NORMALIZATION HAS BEEN APPLIED AND WHERE WE HAVE CELL CYCLE SCORES COMPUTED FOR EACH CELL + Find variable genes + ScaleData.**
-
 ```r
 # Load in the Seurat object
-seurat_phase <-
+seurat_phase <- readRDS("data/QC_seurat_phase.rds")
 
 ```
 
