@@ -348,7 +348,7 @@ DimPlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/SC_umap_SCTv2.png" width="600">
+<img src="img/clustering_DimPlot.png" width="600">
 </p>
 
 
@@ -376,7 +376,7 @@ ggplot(n_cells, aes(x=ident, y=n, fill=sample)) +
 ```
 
 <p align="center">
-<img src="img/cluster_ncells.png" width="850">
+<img src="img/n_cells_per_cluster.png" width="850">
 </p>
 
 
@@ -398,7 +398,7 @@ FeaturePlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/SC_metrics_umpa_loadObj_SCTv2.png" width="800">
+<img src="img/clustering_metrics.png" width="800">
 </p>
 
 With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster and more **quantitatively assess the differences**. The corresponding UMAP is displayed for comparison.
@@ -411,7 +411,7 @@ ggplot(seurat_integrated@meta.data) +
 ```
 
 <p align="center">
-<img src="img/ngene_with_boxplotx.png" width="900">
+<img src="img/genes_per_cluster.png" width="900">
 </p>
 
 ## Exploring known celltype markers
@@ -429,7 +429,7 @@ FeaturePlot(seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/CD14_monocytes_SCTv2.png" width="800">
+<img src="img/cd14_monocytes_featureplot.png" width="800">
 </p>
 
 ### Violin plot
@@ -441,6 +441,10 @@ VlnPlot(object = seurat_integrated,
         features = c("CD14", "LYZ"))
 
 ```
+
+<p align="center">
+<img src="img/violin_plot_integrated2.png" width="800">
+</p>
 
 ### Dotplot
 While the above plot allows you to explore one celltype at a time, Seurat also has a built in **visualization tool which allows us to view the average expression of genes across clusters called DotPlot()**. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.
@@ -468,23 +472,25 @@ After identifying the majority of clusters using known cell type markers, we can
 ```r
 # Rename all identities
 seurat_integrated <- RenameIdents(object = seurat_integrated, 
-                               "0" = "Naive or memory CD4+ T cells",
-                               "1" = "CD14+ monocytes",
-                               "2" = "Activated T cells",
-                               "3" = "CD14+ monocytes",
-                               "4" = "Stressed cells / Unknown",
-                               "5" = "CD8+ T cells",
-                               "6" = "Naive or memory CD4+ T cells",
-                               "7" = "B cells",
-                               "8" = "NK cells",
-                               "9" = "CD8+ T cells",
-                               "10" = "FCGR3A+ monocytes",
-                               "11" = "B cells",
-                               "12" = "NK cells",
-                               "13" = "B cells",
-                               "14" = "Conventional dendritic cells",
-                               "15" = "Megakaryocytes",
-			       "16" = "Plasmacytoid dendritic cells")
+                                  "0" = "Naive or memory CD4+ T cells",
+                                  "1" = "Activated T cells",
+                                  "2" = "CD14+ monocytes",
+                                  "3" = "CD14+ monocytes",
+                                  "4" = "Stressed cells / Unknown",
+                                  "5" = "CD8+ T cells",
+                                  "6" = "Naive or memory CD4+ T cells",
+                                  "7" = "B cells",
+                                  "8" = "NK cells",
+                                  "9" = "CD8+ T cells",
+                                  "10" = "FCGR3A+ monocytes",
+                                  "11" = "B cells",
+                                  "12" = "NK cells",
+                                  "13" = "B cells",
+                                  "14" = "Conventional dendritic cells",
+                                  "15" = "Megakaryocytes",
+                                  "16" = "Activated T cells", 
+                                  "17" = "Plasmacytoid dendritic cells",
+                                  "18" = "Unknown")
 
 
 # Plot the UMAP
@@ -496,7 +502,7 @@ DimPlot(object = seurat_integrated,
 ```
 
 <p align="center">
-<img src="img/umap_labeled_SCTv2.png" width="600">
+<img src="img/annotated_UMAP.png" width="600">
 </p>
 
 - Experimentally validate intriguing markers for our identified cell types.
