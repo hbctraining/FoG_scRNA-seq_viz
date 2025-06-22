@@ -80,6 +80,8 @@ The cell numbers can also vary by protocol, **producing cell numbers that are mu
 * Presence of dying cells can lead to a higher number of cellular barcodes than cells.
 
 ```r
+# Read in metadata
+metadata <- readRDS("data/QC_metadata.rds")
 # Visualize the number of cell counts per sample
 metadata %>% 
   	ggplot(aes(x=sample, fill=sample)) + 
