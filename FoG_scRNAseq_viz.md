@@ -82,6 +82,10 @@ The cell numbers can also vary by protocol, **producing cell numbers that are mu
 * Presence of dying cells can lead to a higher number of cellular barcodes than cells.
 
 ```r
+# Load libraries
+library(Seurat)
+library(tidyverse)
+
 # Read in metadata
 metadata <- readRDS("data/QC_metadata.rds")
 
