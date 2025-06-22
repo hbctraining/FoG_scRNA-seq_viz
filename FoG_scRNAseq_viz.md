@@ -65,7 +65,7 @@ The barcode rank plot is **an important visualization which shows the distributi
 
 
 ## Cell-level quality metrics
-To determine low quality cells that should be removed from the analysis, various metrics are assessed. Below, we present visualizations to display these metrics across cells within each sample in our dataset. 
+To determine low quality cells that should be removed from the analysis, various metrics are assessed. Visualizations of these metrics aid in determining the filtering thresholds for removal of the low quality cells. Below, we present visualizations to display these metrics across cells within each sample in our dataset. 
 
 ### Cell counts
 
