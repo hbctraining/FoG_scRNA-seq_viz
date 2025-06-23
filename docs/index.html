@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Visualizing the single-cell RNA-seq workflow</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Visualizing the single-cell RNA-seq workflow</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://bioinformatics.sph.harvard.edu/" rel="" target="">
+ <span class="menu-text">HBC</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/hbctraining/Intro-to-scRNAseq-Quarto" rel="" target="">
+ <span class="menu-text">GitHub</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="mailto:hbctraining@hsph.harvard.edu" rel="" target="">
+ <span class="menu-text">Contact us</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#visualizing-the-single-cell-rna-seq-workflow" id="toc-visualizing-the-single-cell-rna-seq-workflow" class="nav-link active" data-scroll-target="#visualizing-the-single-cell-rna-seq-workflow">Visualizing the single-cell RNA-seq workflow</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#scrna-seq-workflow" id="toc-scrna-seq-workflow" class="nav-link" data-scroll-target="#scrna-seq-workflow">scRNA-seq Workflow</a></li>
+  <li><a href="#quality-control" id="toc-quality-control" class="nav-link" data-scroll-target="#quality-control">Quality control</a>
+  <ul class="collapse">
+  <li><a href="#sequencing-read-quality" id="toc-sequencing-read-quality" class="nav-link" data-scroll-target="#sequencing-read-quality">Sequencing read quality</a>
+  <ul class="collapse">
+  <li><a href="#barcode-rank-plot" id="toc-barcode-rank-plot" class="nav-link" data-scroll-target="#barcode-rank-plot">Barcode rank plot</a></li>
+  </ul></li>
+  <li><a href="#cell-level-quality-metrics" id="toc-cell-level-quality-metrics" class="nav-link" data-scroll-target="#cell-level-quality-metrics">Cell-level quality metrics</a>
+  <ul class="collapse">
+  <li><a href="#cell-counts" id="toc-cell-counts" class="nav-link" data-scroll-target="#cell-counts">Cell counts</a></li>
+  <li><a href="#umi-counts-per-cell" id="toc-umi-counts-per-cell" class="nav-link" data-scroll-target="#umi-counts-per-cell">UMI counts per cell</a></li>
+  <li><a href="#genes-detected-per-cell" id="toc-genes-detected-per-cell" class="nav-link" data-scroll-target="#genes-detected-per-cell">Genes detected per cell</a></li>
+  <li><a href="#fraction-of-reads-mapping-to-mitochondrial-genes" id="toc-fraction-of-reads-mapping-to-mitochondrial-genes" class="nav-link" data-scroll-target="#fraction-of-reads-mapping-to-mitochondrial-genes">Fraction of reads mapping to mitochondrial genes</a></li>
+  <li><a href="#joint-filtering" id="toc-joint-filtering" class="nav-link" data-scroll-target="#joint-filtering">Joint filtering</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#normalization-and-regressing-out-unwanted-variation" id="toc-normalization-and-regressing-out-unwanted-variation" class="nav-link" data-scroll-target="#normalization-and-regressing-out-unwanted-variation">Normalization and regressing out unwanted variation</a>
+  <ul class="collapse">
+  <li><a href="#evaluating-effects-of-cell-cycle" id="toc-evaluating-effects-of-cell-cycle" class="nav-link" data-scroll-target="#evaluating-effects-of-cell-cycle">Evaluating effects of cell cycle</a>
+  <ul class="collapse">
+  <li><a href="#highly-variable-genes" id="toc-highly-variable-genes" class="nav-link" data-scroll-target="#highly-variable-genes">Highly variable genes</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
+  </ul></li>
+  <li><a href="#sctransform" id="toc-sctransform" class="nav-link" data-scroll-target="#sctransform">SCTransform</a></li>
+  </ul></li>
+  <li><a href="#integration" id="toc-integration" class="nav-link" data-scroll-target="#integration">Integration</a>
+  <ul class="collapse">
+  <li><a href="#to-integrate-or-not-to-integrate" id="toc-to-integrate-or-not-to-integrate" class="nav-link" data-scroll-target="#to-integrate-or-not-to-integrate">To integrate or not to integrate?</a></li>
+  <li><a href="#approaches-for-integration" id="toc-approaches-for-integration" class="nav-link" data-scroll-target="#approaches-for-integration">Approaches for integration</a>
+  <ul class="collapse">
+  <li><a href="#canonical-correlation-analysis-cca" id="toc-canonical-correlation-analysis-cca" class="nav-link" data-scroll-target="#canonical-correlation-analysis-cca">Canonical Correlation Analysis (CCA)</a></li>
+  <li><a href="#harmony" id="toc-harmony" class="nav-link" data-scroll-target="#harmony">Harmony</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#clustering-cells" id="toc-clustering-cells" class="nav-link" data-scroll-target="#clustering-cells">Clustering cells</a></li>
+  <li><a href="#cluster-qc-and-identification-of-cell-types" id="toc-cluster-qc-and-identification-of-cell-types" class="nav-link" data-scroll-target="#cluster-qc-and-identification-of-cell-types">Cluster QC and identification of cell types</a>
+  <ul class="collapse">
+  <li><a href="#exploration-of-qc-metrics" id="toc-exploration-of-qc-metrics" class="nav-link" data-scroll-target="#exploration-of-qc-metrics">Exploration of QC metrics</a></li>
+  <li><a href="#exploring-known-celltype-markers" id="toc-exploring-known-celltype-markers" class="nav-link" data-scroll-target="#exploring-known-celltype-markers">Exploring known celltype markers</a>
+  <ul class="collapse">
+  <li><a href="#feature-plot" id="toc-feature-plot" class="nav-link" data-scroll-target="#feature-plot">Feature Plot</a></li>
+  <li><a href="#violin-plot" id="toc-violin-plot" class="nav-link" data-scroll-target="#violin-plot">Violin plot</a></li>
+  <li><a href="#dotplot" id="toc-dotplot" class="nav-link" data-scroll-target="#dotplot">Dotplot</a></li>
+  </ul></li>
+  <li><a href="#celltype-assignment" id="toc-celltype-assignment" class="nav-link" data-scroll-target="#celltype-assignment">Celltype assignment</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><div class="quarto-title-block"><div class="quarto-title-tools-only"><h1></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+
+
+
+<section id="visualizing-the-single-cell-rna-seq-workflow" class="level1">
+<h1>Visualizing the single-cell RNA-seq workflow</h1>
+<p><strong><em>By: Mary Piper (Pfizer) and Meeta Mistry (Harvard Chan Bioinformatics Core)</em></strong></p>
+<p><strong><em>Materials adapted from the <a href="https://hbctraining.github.io/Intro-to-scRNAseq/schedule/links-to-lessons.html">Harvard Chan Bioinformatics Core’s single-cell RNA-seq workshop</a></em></strong></p>
+</section>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because they enable researchers to interpret complex, high-dimensional datasets in an intuitive, interpretable, and accessible way. When evaluating the quality of the data, scatter plots, ridgeline plots, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.</p>
+<p>In this short tutorial, we will highlight some key visualizations that are should be considered when performing a single cell RNA-seq analysis.</p>
+</section>
+<section id="scrna-seq-workflow" class="level1">
+<h1>scRNA-seq Workflow</h1>
+<p>The single cell RNA-seq worklfow is comprised of multiple core steps required for a high-quality analysis. Other steps may be added throughout the workflow, if needed, but the core steps of the workflow include:</p>
+<ul>
+<li><strong>Generation of the count matrix (method-specific steps):</strong> formatting reads, demultiplexing samples, mapping and quantification</li>
+<li><strong>Quality control of the raw counts:</strong> identification and filtering of poor quality cells</li>
+<li><strong>Normalization and exploring unwanted variation</strong>: identifying highly variable genes/features, stabilizing variance, data exploration of potential sources of variation</li>
+<li><strong>Integration (batch correction):</strong> aligning cells across batches, samples, conditions, and/or modalities</li>
+<li><strong>Clustering of filtered counts:</strong> clustering cells based on similarities in transcriptional activity (cell types = different clusters) and exploration of QC metrics and expression levels of known marker genes for expected cell type populations</li>
+<li><strong>Marker identification and cluster annotation:</strong> identifying gene markers for each cluster and annotating cell type clusters</li>
+<li><strong>Optional downstream steps</strong>: differential expression analysis, trajectory inference, composition analysis</li>
+</ul>
+<p align="center">
+</p><p><img src="img/scRNA-seq_steps_image.jpg" width="700"></p>
+<p></p>
+<p><em><strong>Image credit:</strong> Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)</em></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Experimental design considerations
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Not included in the workflow above, <strong>but equally, if not more important</strong> are the <strong>experimental design considerations</strong>! As you begin to think about your single cell experiment, ask yourself the following: 1. Do you absolutely need single cell resolution? Would a FACS sort + bulk RNA-seq analysis suffice for the biological question? 2. Do you have biological replicates? Conclusions about a population of cells based on a single sample per condition are not trustworthy. <strong>Biological replicates are necessary!</strong> * <strong>Do not pool your biological replicates.</strong> If you have limited tissue or very few cells, pool the same number of samples for every biological replicate. 4. Do you have batch effects? Best practice is to design the experiment in a way such that <strong>technical variability is minimized between samples</strong>. However, with large sample sizes it is impossible to prepare everything at once and so it is recommended to split replicates across batches. Also, be sure to keep track all sample-level metadata as it can be helpful in interpretation of results.</p>
+</div>
+</div>
+</section>
+<section id="quality-control" class="level1">
+<h1>Quality control</h1>
+<p><strong><em>Goals:</em></strong></p>
+<ul>
+<li><em>To <strong>filter the data to only include true cells that are of high quality</strong>, so that when we cluster our cells it is easier to identify distinct cell type populations</em></li>
+<li><em>To <strong>identify any failed samples</strong> and either try to salvage the data or remove from analysis, in addition to try to understand why the sample failed</em></li>
+</ul>
+<section id="sequencing-read-quality" class="level2">
+<h2 class="anchored" data-anchor-id="sequencing-read-quality">Sequencing read quality</h2>
+<p>A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacts and ensure robust downstream analyses. Some examples of these include:</p>
+<ul>
+<li><strong>Mean Reads per Cell</strong>: the total number of sequenced reads divided by the number of cells. 10X recommends a minimum of 20,000 read pairs per cell.</li>
+<li><strong>Valid Barcodes</strong>: shows the fraction of reads with barcodes that match the inclusion list after barcode correction. Low valid barcodes (&lt;75%) may indicate sequencing issues or sample/library preparation issues.</li>
+<li><strong>Mapping Rate</strong>: The percentage of reads that align successfully to the transcriptome. Overall, we would like the reads mapped to the genome to be high (for example, &gt;85% for mouse or human), but could vary depending on the species.
+<ul>
+<li>Intergenic reads should be low. Intronic reads can be higher when the sample is prepared from nuclei or cells with high-level of intron retention (i.e.&nbsp;neutrophils)</li>
+</ul></li>
+<li><strong>Fraction Reads in Cells</strong>: shows the fraction of valid-barcode, confidently-mapped reads with cell-associated barcodes. Lower percentages (&lt; 70%) indicate that a high level of ambient RNA partitioned into all (cell-containing and non-cell-containing) GEMs.</li>
+</ul>
+<section id="barcode-rank-plot" class="level3">
+<h3 class="anchored" data-anchor-id="barcode-rank-plot">Barcode rank plot</h3>
+<p>The barcode rank plot is <strong>an important visualization which shows the distribution of UMI counts in barcodes</strong>. All detected barcodes are plotted in decreasing order of the number of UMIs associated with that particular barcode. The <strong>shape of these plots</strong> can indicate a few different things about the sample:</p>
+<ul>
+<li>Typical: Clear cliff and knee with separation between cells and background.</li>
+<li>Heterogeneous: Bimodal plot with 2 cliffs and knees, with a clear divide between cells and background.</li>
+<li>Compromised: Round curve with a steep drop-off at the end whih indicated low quality due to many factors.</li>
+<li>Compromised: Defined cliff and knee, but with few barcodes detected could be due to inaccurate cell count or clogging.</li>
+</ul>
+<p align="center">
+</p><p><img src="img/barcode_rank_plot.png" width="500"></p>
+<p></p>
+</section>
+</section>
+<section id="cell-level-quality-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="cell-level-quality-metrics">Cell-level quality metrics</h2>
+<p>To determine low quality cells that should be removed from the analysis, various metrics are assessed. Visualizations of these metrics aid in determining the filtering thresholds for removal of the low quality cells. Below, we present visualizations to display these metrics across cells within each sample in our dataset.</p>
+<section id="cell-counts" class="level3">
+<h3 class="anchored" data-anchor-id="cell-counts">Cell counts</h3>
+<p>The cell counts are determined by the number of unique cellular barcodes detected. In an ideal world, you would expect the number of unique cellular barcodes to correspond to the number of cells you loaded. However, this is not the case as capture rates of cells are only a proportion of what is loaded.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The capture efficiency could appear much lower if the cell concentration used for library preparation was not accurate. Cell concentration should NOT be determined by FACS machine or Bioanalyzer (these tools are not accurate for concentration determination), instead use a hemocytometer or automated cell counter for calculation of cell concentration.</p>
+</div>
+</div>
+<p>The cell numbers can also vary by protocol, <strong>producing cell numbers that are much higher than what we loaded</strong>. Some examples of how this could happen include:</p>
+<ul>
+<li>The cellular barcodes are present in the emulsion droplet, with no actual cell.</li>
+<li>Occasionally a droplet can have more than one cellular barcode.</li>
+<li>Presence of dying cells can lead to a higher number of cellular barcodes than cells.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load libraries</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in metadata</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/QC_metadata.rds"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the number of cell counts per sample</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>sample, <span class="at">fill=</span>sample)) <span class="sc">+</span> </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">vjust =</span> <span class="dv">1</span>, <span class="at">hjust=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust=</span><span class="fl">0.5</span>, <span class="at">face=</span><span class="st">"bold"</span>)) <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"NCells"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We see over 15,000 cells per sample, which is quite a bit more than the 12-13,000 expected. It is clear that we likely have some junk ‘cells’ present.</p>
+</section>
+<section id="umi-counts-per-cell" class="level3">
+<h3 class="anchored" data-anchor-id="umi-counts-per-cell">UMI counts per cell</h3>
+<p>The UMI counts per cell should generally be above 500, that is the low end of what we expect. If UMI counts are between 500-1000 counts, it is usable but the cells probably should have been sequenced more deeply.</p>
+</section>
+<section id="genes-detected-per-cell" class="level3">
+<h3 class="anchored" data-anchor-id="genes-detected-per-cell">Genes detected per cell</h3>
+<p>We have similar expectations for gene detection as for UMI detection, although it may be a bit lower than UMIs. For high quality data, the proportional histogram should contain <strong>a single large peak that represents cells that were encapsulated</strong>.</p>
+<p>If we see a <strong>small shoulder</strong> to the left of the major peak (not present in our data), or a bimodal distribution of the cells, that can indicate a couple of things. It might be that there are a set of <strong>cells that failed</strong> for some reason. It could also be that there are <strong>biologically different types of cells</strong> (i.e.&nbsp;quiescent cell populations, less complex cells of interest), and/or one type is much smaller than the other (i.e.&nbsp;cells with high counts may be cells that are larger in size). Therefore, this threshold should be assessed with other metrics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the distribution of genes detected per cell via histogram</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">color=</span>sample, <span class="at">x=</span>nGene, <span class="at">fill=</span> sample)) <span class="sc">+</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">300</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="fraction-of-reads-mapping-to-mitochondrial-genes" class="level3">
+<h3 class="anchored" data-anchor-id="fraction-of-reads-mapping-to-mitochondrial-genes">Fraction of reads mapping to mitochondrial genes</h3>
+<p>This metric can identify whether there is a large amount of <strong>mitochondrial contamination from dead or dying cells</strong>. We define poor quality samples for mitochondrial counts as cells which surpass the 0.2 mitochondrial ratio mark, unless of course you are expecting this in your sample.</p>
+</section>
+<section id="joint-filtering" class="level3">
+<h3 class="anchored" data-anchor-id="joint-filtering">Joint filtering</h3>
+<p>Considering any of these QC metrics in isolation can lead to misinterpretation of cellular signals. For example, cells with a comparatively high fraction of mitochondrial counts may be involved in respiratory processes and may be cells that you would like to keep. Likewise, other metrics can have other biological interpretations. A general rule of thumb when performing QC is to <strong>set thresholds for individual metrics to be as permissive as possible, and always consider the joint effects</strong> of these metrics. In this way, you reduce the risk of filtering out any viable cell populations.</p>
+<p>Two metrics that are often evaluated together are the number of UMIs and the number of genes detected per cell. Here, we have plotted the <strong>number of genes versus the number of UMIs coloured by the fraction of mitochondrial reads</strong>. Jointly visualizing the count and gene thresholds and additionally overlaying the mitochondrial fraction, gives a summarized persepective of the quality per cell.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the correlation between genes detected and number of UMIs and determine whether strong presence of cells with low numbers of genes/UMIs</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>nUMI, <span class="at">y=</span>nGene, <span class="at">color=</span>mitoRatio)) <span class="sc">+</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_gradient</span>(<span class="at">low =</span> <span class="st">"gray90"</span>, <span class="at">high =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_log10</span>() <span class="sc">+</span> </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">500</span>) <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">250</span>) <span class="sc">+</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>sample)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Good cells will generally exhibit both higher number of genes per cell and higher numbers of UMIs (upper right quadrant of the plot). Cells that are <strong>poor quality are likely to have low genes and UMIs per cell</strong>, and correspond to the data points in the bottom left quadrant of the plot. With this plot we also evaluate the <strong>slope of the line</strong>, and any scatter of data points in the <strong>bottom right hand quadrant</strong> of the plot. These cells have a high number of UMIs but only a few number of genes. These could be dying cells, but also could represent a population of a low complexity celltype (i.e red blood cells).</p>
+<p><strong>Mitochondrial read fractions are only high in particularly low count cells with few detected genes</strong> (darker colored data points). This could be indicative of damaged/dying cells whose cytoplasmic mRNA has leaked out through a broken membrane, and thus, only mRNA located in the mitochondria is still conserved. We can see from the plot, that these cells are filtered out by our count and gene number thresholds.</p>
+<p>After deciding on our quality thresholds and filtering the data, we would re-run the plots to ensure good quality metrics post-filtering. Based on the quality filtering, we should now have true cells of high quality and identified any failed samples.</p>
+</section>
+</section>
+</section>
+<section id="normalization-and-regressing-out-unwanted-variation" class="level1">
+<h1>Normalization and regressing out unwanted variation</h1>
+<p><strong><em>Goals:</em></strong></p>
+<ul>
+<li><em>To accurately <strong>normalize the gene expression values</strong> to account for differences in sequencing depth and overdispersed count values.</em></li>
+<li><em>To <strong>identify the most variant genes</strong> likely to be indicative of the different cell types present.</em></li>
+<li><em><strong>Checking and removing unwanted variation</strong> so that we do not have cells clustering by artifacts downstream</em></li>
+</ul>
+<p>An essential first step in the majority of mRNA expression analyses is normalization, whereby systematic variations are adjusted for to <strong>make expression counts comparable across genes and cells</strong>. The counts of mapped reads for each gene is proportional to the expression of RNA (“interesting”) in addition to many other factors (“uninteresting”). Normalization is the process of adjusting raw count values to account for the “uninteresting” factors.</p>
+<p>Before we make any comparisons across cells, we will <strong>apply a simple normalization.</strong> This is solely for the purpose of exploring the sources of variation in our data.</p>
+<section id="evaluating-effects-of-cell-cycle" class="level2">
+<h2 class="anchored" data-anchor-id="evaluating-effects-of-cell-cycle">Evaluating effects of cell cycle</h2>
+<p>To assign each cell a score based on its expression of G2/M and S phase markers, we have used the Seurat function <code>CellCycleScoring()</code>. This function calculates cell cycle phase scores based on canonical markers that required as input. After scoring the cells for cell cycle, we would like to <strong>determine whether cell cycle is a major source of variation in our dataset using PCA</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load in the Seurat object</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>seurat_phase <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/QC_seurat_phase Mary Piper.rds"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>seurat_phase</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>An object of class Seurat 
+14065 features across 29629 samples within 1 assay 
+Active assay: RNA (14065 features, 2000 variable features)
+ 3 layers present: counts, data, scale.data
+ 1 dimensional reduction calculated: pca</code></pre>
+</div>
+</div>
+<section id="highly-variable-genes" class="level3">
+<h3 class="anchored" data-anchor-id="highly-variable-genes">Highly variable genes</h3>
+<p>To perform PCA, we need to <strong>first choose the most variable features, then scale the data</strong>. Since highly expressed genes exhibit the highest amount of variation and we don’t want our ‘highly variable genes’ only to reflect high expression, we need to scale the data to scale variation with expression level.</p>
+<p>Seurat allows us to access the ranked highly variable genes with the <code>VariableFeatures()</code> function. We can additionally <strong>visualize the dispersion of all genes using Seurat’s <code>VariableFeaturePlot()</code></strong>, which shows a gene’s average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the <code>LabelPoints()</code> helps us understand which genes will be driving shape of our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify the 15 most highly variable genes</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ranked_variable_genes <span class="ot">&lt;-</span> <span class="fu">VariableFeatures</span>(seurat_phase)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>top_genes <span class="ot">&lt;-</span> ranked_variable_genes[<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the average expression and variance of these genes</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># With labels to indicate which genes are in the top 15</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">VariableFeaturePlot</span>(seurat_phase)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">LabelPoints</span>(<span class="at">plot =</span> p, <span class="at">points =</span> top_genes, <span class="at">repel =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+</section>
+<section id="pca" class="level3">
+<h3 class="anchored" data-anchor-id="pca">PCA</h3>
+<p>Principal Component Analysis (PCA) is a technique used to emphasize variation as well as similarity, and to bring out strong patterns in a dataset; it is one of the methods used for <em>“dimensionality reduction”</em>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+PCA
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a more <strong>detailed explanation on PCA</strong>, please <a href="https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/05_theory_of_PCA.html">look over this lesson</a> (adapted from StatQuests/Josh Starmer’s YouTube video). We also strongly encourage you to explore the video <a href="https://www.youtube.com/watch?v=_UVHneBUBW0">StatQuest’s video</a> for a more thorough understanding.</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform PCA</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>seurat_phase <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(seurat_phase)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the PCA colored by cell cycle phase</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_phase,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"pca"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">group.by=</span> <span class="st">"Phase"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"Phase"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+<p>Here, we have performed the PCA analysis using the most highly variable genes and plotted the first two principal components against each other. We have also split the figure by cell cycle phase, to evaluate similarities and/or differences. <strong>We do not see large differences due to cell cycle phase. Based on this plot, we would not regress out the variation due to cell cycle</strong>.</p>
+<details>
+<summary>
+<b><i>When should cell cycle phase be regressed out?</i></b>
+</summary>
+<p><br>Below are two PCA plots taken from the Seurat vignette dealing with <a href="https://satijalab.org/seurat/archive/v3.1/cell_cycle_vignette.html">Cell-Cycle Scoring and Regression</a>.<br></p>
+<ul>
+<li>
+This first plot is similar to what we plotted above, it is a PCA prior to regression to evaluate if the cell cycle is playing a big role in driving PC1 and PC2. Clearly, the cells are separating by cell type in this case, so the vignette suggests regressing out these effects.
+</li>
+</ul>
+<p align="center">
+</p><p><img src="img/cell_cycle_not_regressed.png" width="400"></p>
+<p></p>
+<ul>
+<li>
+This second PCA plot is <b>post-regression</b>, and displays how effective the regression was in removing the effect we observed.
+</li>
+</ul>
+<p align="center">
+</p><p><img src="img/cell_cycle_regressed.png" width="400"></p>
+<p></p>
+</details>
+</section>
+</section>
+<section id="sctransform" class="level2">
+<h2 class="anchored" data-anchor-id="sctransform">SCTransform</h2>
+<p>In the <a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1">Hafemeister and Satija, 2019 paper</a> the authors explored the issues with simple transformations. Specifically they evaluated the standard log normalization approach and found that:</p>
+<ul>
+<li>genes with different abundances are affected differently and that **effective normalization (using the log transform) is only observed with low/medium abundance genes (Figure 1D, below)</li>
+<li>substantial imbalances in variance were observed with the log-normalized data (Figure 1E, below)
+<ul>
+<li>cells with low total UMI counts exhibited disproportionately higher variance for high-abundance genes, dampening the variance contribution from other gene abundances</li>
+</ul></li>
+</ul>
+<p align="center">
+</p><p><img src="img/SCT_Fig1.png" width="600"></p>
+<p></p>
+<p><em><strong>Image credit:</strong> Hafemeister C and Satija R. Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression, Genom Biology 2019 (https://doi.org/10.1101/576827)</em></p>
+<p>The conclusion is, <strong>we cannot treat all genes the same.</strong></p>
+<p>The proposed solution was the use of <strong>Pearson residuals for transformation</strong>, as implemented in Seurat’s <code>SCTransform</code> function. With this approach:</p>
+<ul>
+<li>Measurements are multiplied by a gene-specific weight</li>
+<li>Each gene is weighted based on how much evidence there is that it is non-uniformly expressed across cells</li>
+<li>More evidence == more of a weight; Genes that are expressed in only a small fraction of cells will be favored (useful for finding rare cell populations)</li>
+<li>Not just a consideration of the expression level is, but also the distribution of expression</li>
+</ul>
+</section>
+</section>
+<section id="integration" class="level1">
+<h1>Integration</h1>
+<p><strong><em>Goals:</em></strong></p>
+<ul>
+<li><em>To <strong>align same cell types</strong> so as not to have clustering downstream driven by differences between samples, conditions, modalities, or batches.</em></li>
+</ul>
+<section id="to-integrate-or-not-to-integrate" class="level2">
+<h2 class="anchored" data-anchor-id="to-integrate-or-not-to-integrate">To integrate or not to integrate?</h2>
+<p>Generally, we always look at our clustering <strong>without integration</strong> before deciding whether we need to perform any alignment. <strong>Do not just always perform integration because you think there might be differences - explore the data.</strong> If we had performed the normalization on both conditions together in a Seurat object and visualized the similarity between cells, we would have seen condition-specific clustering:</p>
+<p align="center">
+</p><p><img src="img/unintegrated_umap.png" width="600"></p>
+<p></p>
+<p>Condition-specific clustering of the cells indicates that we need to integrate the cells across conditions to ensure that cells of the same cell type cluster together.</p>
+<p><strong>Why is it important the cells of the same cell type cluster together?</strong></p>
+<p>We want to identify <strong><em>cell types which are present in all samples/conditions/modalities</em></strong> within our dataset, and therefore would like to observe a representation of cells from both samples/conditions/modalities in every cluster. This will enable more interpretable results downstream (i.e.&nbsp;DE analysis, ligand-receptor analysis, differential abundance analysis…).</p>
+</section>
+<section id="approaches-for-integration" class="level2">
+<h2 class="anchored" data-anchor-id="approaches-for-integration">Approaches for integration</h2>
+<p>To integrate, we will use the shared highly variable genes (identified using SCTransform) from each group, then, we will “integrate” or “harmonize” the groups to overlay cells that are similar or have a “common set of biological features” between groups. Integration is a powerful method that <strong>uses these shared sources of greatest variation to identify shared subpopulations across conditions or datasets</strong> [<a href="https://www.biorxiv.org/content/early/2018/11/02/460147">Stuart and Bulter et al.&nbsp;(2018)</a>]. The goal of integration is to ensure that the cell types of one condition/dataset align with the same celltypes of the other conditions/datasets (e.g.&nbsp;macrophages in one sample align with macrophages in the other samples).</p>
+<section id="canonical-correlation-analysis-cca" class="level3">
+<h3 class="anchored" data-anchor-id="canonical-correlation-analysis-cca">Canonical Correlation Analysis (CCA)</h3>
+<p>CCA is a form of PCA, in that it identifies the greatest sources of variation in the data, but only if it is shared or conserved across the conditions/groups (using the 3000 most variant genes from each sample). The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</p>
+</section>
+<section id="harmony" class="level3">
+<h3 class="anchored" data-anchor-id="harmony">Harmony</h3>
+<p>Harmony was devleoped in 2019, and is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony applies a transformation to the principal component (PCs) values, using all available PCs, e.g.&nbsp;as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum “diversity”.</p>
+<p>For this dataset, we applied CCA integration. To <strong>evaluate the effect of integration</strong>, we can visualize the aligned data in a UMAP to ensure we now have proper alignment across our samples.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>seurat_integrated <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/integrated_seurat Mary Piper.rds"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP split by sample</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"sample"</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="clustering-cells" class="level1">
+<h1>Clustering cells</h1>
+<p><strong><em>Goals:</em></strong></p>
+<ul>
+<li><em>To <strong>generate cell type-specific clusters</strong> and use known cell type marker genes to determine the identities of the clusters.</em></li>
+<li><em>To <strong>determine whether clusters represent true cell types or cluster due to biological or technical variation</strong>, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.</em></li>
+</ul>
+<p>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected ‘quasi-cliques’ or ‘communities’ [<a href="https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html">Seurat - Guided Clustering Tutorial</a>]. A nice in-depth description of clustering methods is provided in the <a href="https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html">SVI Bioinformatics and Cellular Genomics Lab course</a>.</p>
+<p>The <code>resolution</code> is an important argument that sets the “granularity” of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <code>resolution</code> set between <code>0.4</code>-<code>1.4</code> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</p>
+<p>To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the <a href="https://umap-learn.readthedocs.io/en/latest/how_umap_works.html">UMAP method</a> for <strong>visualizing the clusters at a resolution of 0.8</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign identity of clusters</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/clustering_integrated_seurat.rds"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> seurat_clustered) <span class="ot">&lt;-</span> <span class="st">"integrated_snn_res.0.8"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_clustered,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="cluster-qc-and-identification-of-cell-types" class="level1">
+<h1>Cluster QC and identification of cell types</h1>
+<p><strong><em>Goals:</em></strong></p>
+<ul>
+<li><em>To <strong>determine whether clusters represent true cell types or cluster due to biological or technical variation</strong>, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.</em></li>
+<li><em>To use known cell type marker genes to <strong>determine the identities of the clusters</strong>.</em></li>
+</ul>
+<section id="exploration-of-qc-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="exploration-of-qc-metrics">Exploration of QC metrics</h2>
+<p>Let’s begin by using a <strong>barplot</strong> to take a look at the <strong>number of cells per cluster</strong>, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract identity and sample information from seurat object to </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># determine the number of cells per cluster per sample</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>n_cells <span class="ot">&lt;-</span> <span class="fu">FetchData</span>(seurat_clustered, </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"ident"</span>, <span class="st">"sample"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">count</span>(ident, sample)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot of number of cells per cluster by sample</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(n_cells, <span class="fu">aes</span>(<span class="at">x=</span>ident, <span class="at">y=</span>n, <span class="at">fill=</span>sample)) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="fu">position_dodge</span>(), <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>n), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">2</span>, <span class="at">position=</span><span class="fu">position_dodge</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="1440"></p>
+</div>
+</div>
+<p>To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore various metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. If enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the particular cell type.</p>
+<p>Next let’s explore these metrics by overlaying them on the UMAP using a <strong>FeaturePlot</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine metrics to plot present in seurat_integrated@meta.data</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>metrics <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"nUMI"</span>, <span class="st">"nGene"</span>, <span class="st">"S.Score"</span>, <span class="st">"G2M.Score"</span>, <span class="st">"mitoRatio"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> metrics,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">pt.size =</span> <span class="fl">0.4</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use <strong>boxplots</strong> to zoom in on the number of genes expressed in each cluster and more <strong>quantitatively assess the differences</strong>. The corresponding UMAP is displayed for comparison.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplot of nGene per cluster</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seurat_clustered<span class="sc">@</span>meta.data) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>integrated_snn_res.<span class="fl">0.8</span>, <span class="at">y=</span>nGene, <span class="at">fill=</span>integrated_snn_res.<span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NoLegend</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="exploring-known-celltype-markers" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-known-celltype-markers">Exploring known celltype markers</h2>
+<p>We can explore the different clusters and best identify their cell type identities by looking at expression of known marker genes. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. In teh example below, <strong>CD14+ monocyte markers</strong> appear to correspond to clusters 1, and 3. We wouldn’t include clusters 14 and 10 because they do not highly express both of these markers.</p>
+<section id="feature-plot" class="level3">
+<h3 class="anchored" data-anchor-id="feature-plot">Feature Plot</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>), </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>, </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+<section id="violin-plot" class="level3">
+<h3 class="anchored" data-anchor-id="violin-plot">Violin plot</h3>
+<p>We can also explore the range in expression of specific markers by using <strong>violin plots</strong>. Violin plots are similar to box plots, except that they <strong>also show the probability density of the data at different values</strong>, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the <strong>full distribution of the data</strong>. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Violin plot - CD14+ monocyte</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">VlnPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="1728"></p>
+</div>
+</div>
+</section>
+<section id="dotplot" class="level3">
+<h3 class="anchored" data-anchor-id="dotplot">Dotplot</h3>
+<p>While the above plot allows you to explore one celltype at a time, Seurat also has a built in <strong>visualization tool which allows us to view the average expression of genes across clusters called DotPlot()</strong>. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List of known celltype markers</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>markers <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"CD14+ monocytes"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"FCGR3A+ monocyte"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCGR3A"</span>, <span class="st">"MS4A7"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Macrophages"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"MARCO"</span>, <span class="st">"ITGAM"</span>, <span class="st">"ADGRE1"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Conventional dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCER1A"</span>, <span class="st">"CST3"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Plasmacytoid dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"IL3RA"</span>, <span class="st">"GZMB"</span>, <span class="st">"SERPINF1"</span>, <span class="st">"ITM2C"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dotplot based on RNA expression</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(seurat_clustered, markers, <span class="at">assay=</span><span class="st">"RNA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="1440"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="celltype-assignment" class="level2">
+<h2 class="anchored" data-anchor-id="celltype-assignment">Celltype assignment</h2>
+<p>After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers. Once we have identified the cell types, we can <strong>assign the cell type names to each cluster</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename all identities</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"0"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"Stressed cells / Unknown"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"10"</span> <span class="ot">=</span> <span class="st">"FCGR3A+ monocytes"</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"11"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"12"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"13"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"14"</span> <span class="ot">=</span> <span class="st">"Conventional dendritic cells"</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"15"</span> <span class="ot">=</span> <span class="st">"Megakaryocytes"</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"16"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>, </span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"17"</span> <span class="ot">=</span> <span class="st">"Plasmacytoid dendritic cells"</span>,</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"18"</span> <span class="ot">=</span> <span class="st">"Unknown"</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">3</span>,</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">repel =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>After we have finished identifying cell types, often additional work is needed for validation or addressing additional questions. Some additional downstream work could include:</p>
+<ul>
+<li>Experimentally validate intriguing markers for our identified cell types.</li>
+<li>Explore a subset of the cell types to discover subclusters of cells as described <a href="https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/seurat_subclustering.html">here</a></li>
+<li>Differential expression analysis within a particular cell type or subcluster.</li>
+<li>Trajectory analysis, or lineage tracing, could be performed if trying to determine the progression between cell types or cell states. For example, we could explore any of the following using this type of analysis:
+<ul>
+<li>Differentiation processes</li>
+<li>Expression changes over time</li>
+<li>Cell state changes in expression</li>
+</ul></li>
+</ul>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Visualizing the single-cell RNA-seq workflow</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>***By: Mary Piper (Pfizer) and Meeta Mistry (Harvard Chan Bioinformatics Core)***</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>***Materials adapted from the [Harvard Chan Bioinformatics Core's single-cell RNA-seq workshop](https://hbctraining.github.io/Intro-to-scRNAseq/schedule/links-to-lessons.html)***</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>Visualization methods are critical when analyzing single-cell RNA sequencing (scRNA-seq) data because they enable researchers to interpret complex, high-dimensional datasets in an intuitive, interpretable, and accessible way. When evaluating the quality of the data, scatter plots, ridgeline plots, boxplots and violin plots are used to display the spread and central tendency of gene expression levels across cells or clusters. By using methods such as PCA, UMAP, or heatmaps, we can uncover patterns, clusters, and relationships among cells, identify rare cell populations, and detect cellular heterogeneity that might be missed with numerical analyses alone. Effective visualizations facilitate hypothesis generation, validation of biological findings, and communication of results to both specialized and broad audiences, ultimately driving deeper insight into single-cell transcriptomics.</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>In this short tutorial, we will highlight some key visualizations that are should be considered when performing a single cell RNA-seq analysis.</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="fu"># scRNA-seq Workflow</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>The single cell RNA-seq worklfow is comprised of multiple core steps required for a high-quality analysis. Other steps may be added throughout the workflow, if needed, but the core steps of the workflow include:</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Generation of the count matrix (method-specific steps):** formatting reads, demultiplexing samples, mapping and quantification</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Quality control of the raw counts:** identification and filtering of poor quality cells</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Normalization and exploring unwanted variation**: identifying highly variable genes/features, stabilizing variance, data exploration of potential sources of variation</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Integration (batch correction):** aligning cells across batches, samples, conditions, and/or modalities</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Clustering of filtered counts:** clustering cells based on similarities in transcriptional activity (cell types = different clusters) and exploration of QC metrics and expression levels of known marker genes for expected cell type populations</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Marker identification and cluster annotation:** identifying gene markers for each cluster and annotating cell type clusters</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Optional downstream steps**: differential expression analysis, trajectory inference, composition analysis</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/scRNA-seq_steps_image.jpg"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"700"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>***Image credit:** Luecken, MD and Theis, FJ. Current best practices in single‐cell RNA‐seq analysis: a tutorial, Mol Syst Biol 2019 (doi: https://doi.org/10.15252/msb.20188746)*</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="fu"># Experimental design considerations</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>Not included in the workflow above, **but equally, if not more important** are the **experimental design considerations**! As you begin to think about your single cell experiment, ask yourself the following: 1. Do you absolutely need single cell resolution? Would a FACS sort + bulk RNA-seq analysis suffice for the biological question? 2. Do you have biological replicates? Conclusions about a population of cells based on a single sample per condition are not trustworthy. **Biological replicates are necessary!** \* **Do not pool your biological replicates.** If you have limited tissue or very few cells, pool the same number of samples for every biological replicate. 4. Do you have batch effects? Best practice is to design the experiment in a way such that **technical variability is minimized between samples**. However, with large sample sizes it is impossible to prepare everything at once and so it is recommended to split replicates across batches. Also, be sure to keep track all sample-level metadata as it can be helpful in interpretation of results.</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="fu"># Quality control</span></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **filter the data to only include true cells that are of high quality**, so that when we cluster our cells it is easier to identify distinct cell type populations*</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **identify any failed samples** and either try to salvage the data or remove from analysis, in addition to try to understand why the sample failed*</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sequencing read quality</span></span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>A first step in quality assessment of data is to evaluate some key sequence read metrics which can help identify technical artifacts and ensure robust downstream analyses. Some examples of these include:</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Mean Reads per Cell**: the total number of sequenced reads divided by the number of cells. 10X recommends a minimum of 20,000 read pairs per cell.</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Valid Barcodes**: shows the fraction of reads with barcodes that match the inclusion list after barcode correction. Low valid barcodes (<span class="sc">\&lt;</span>75%) may indicate sequencing issues or sample/library preparation issues.</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Mapping Rate**: The percentage of reads that align successfully to the transcriptome. Overall, we would like the reads mapped to the genome to be high (for example, <span class="sc">\&gt;</span>85% for mouse or human), but could vary depending on the species.</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Intergenic reads should be low. Intronic reads can be higher when the sample is prepared from nuclei or cells with high-level of intron retention (i.e. neutrophils)</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Fraction Reads in Cells**: shows the fraction of valid-barcode, confidently-mapped reads with cell-associated barcodes. Lower percentages (<span class="sc">\&lt;</span> 70%) indicate that a high level of ambient RNA partitioned into all (cell-containing and non-cell-containing) GEMs.</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="fu">### Barcode rank plot</span></span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>The barcode rank plot is **an important visualization which shows the distribution of UMI counts in barcodes**. All detected barcodes are plotted in decreasing order of the number of UMIs associated with that particular barcode. The **shape of these plots** can indicate a few different things about the sample:</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Typical: Clear cliff and knee with separation between cells and background.</span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Heterogeneous: Bimodal plot with 2 cliffs and knees, with a clear divide between cells and background.</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Compromised: Round curve with a steep drop-off at the end whih indicated low quality due to many factors.</span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Compromised: Defined cliff and knee, but with few barcodes detected could be due to inaccurate cell count or clogging.</span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/barcode_rank_plot.png"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"500"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a><span class="fu">## Cell-level quality metrics</span></span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>To determine low quality cells that should be removed from the analysis, various metrics are assessed. Visualizations of these metrics aid in determining the filtering thresholds for removal of the low quality cells. Below, we present visualizations to display these metrics across cells within each sample in our dataset.</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a><span class="fu">### Cell counts</span></span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>The cell counts are determined by the number of unique cellular barcodes detected. In an ideal world, you would expect the number of unique cellular barcodes to correspond to the number of cells you loaded. However, this is not the case as capture rates of cells are only a proportion of what is loaded.</span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>The capture efficiency could appear much lower if the cell concentration used for library preparation was not accurate. Cell concentration should NOT be determined by FACS machine or Bioanalyzer (these tools are not accurate for concentration determination), instead use a hemocytometer or automated cell counter for calculation of cell concentration.</span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>The cell numbers can also vary by protocol, **producing cell numbers that are much higher than what we loaded**. Some examples of how this could happen include:</span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The cellular barcodes are present in the emulsion droplet, with no actual cell.</span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Occasionally a droplet can have more than one cellular barcode.</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Presence of dying cells can lead to a higher number of cellular barcodes than cells.</span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a><span class="co"># Load libraries</span></span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in metadata</span></span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/QC_metadata.rds"</span>)</span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the number of cell counts per sample</span></span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>sample, <span class="at">fill=</span>sample)) <span class="sc">+</span> </span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">vjust =</span> <span class="dv">1</span>, <span class="at">hjust=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust=</span><span class="fl">0.5</span>, <span class="at">face=</span><span class="st">"bold"</span>)) <span class="sc">+</span></span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"NCells"</span>)</span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a>We see over 15,000 cells per sample, which is quite a bit more than the 12-13,000 expected. It is clear that we likely have some junk 'cells' present.</span>
+<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a><span class="fu">### UMI counts per cell</span></span>
+<span id="cb18-112"><a href="#cb18-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-113"><a href="#cb18-113" aria-hidden="true" tabindex="-1"></a>The UMI counts per cell should generally be above 500, that is the low end of what we expect. If UMI counts are between 500-1000 counts, it is usable but the cells probably should have been sequenced more deeply.</span>
+<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a><span class="fu">### Genes detected per cell</span></span>
+<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a>We have similar expectations for gene detection as for UMI detection, although it may be a bit lower than UMIs. For high quality data, the proportional histogram should contain **a single large peak that represents cells that were encapsulated**.</span>
+<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-119"><a href="#cb18-119" aria-hidden="true" tabindex="-1"></a>If we see a **small shoulder** to the left of the major peak (not present in our data), or a bimodal distribution of the cells, that can indicate a couple of things. It might be that there are a set of **cells that failed** for some reason. It could also be that there are **biologically different types of cells** (i.e. quiescent cell populations, less complex cells of interest), and/or one type is much smaller than the other (i.e. cells with high counts may be cells that are larger in size). Therefore, this threshold should be assessed with other metrics.</span>
+<span id="cb18-120"><a href="#cb18-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the distribution of genes detected per cell via histogram</span></span>
+<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">color=</span>sample, <span class="at">x=</span>nGene, <span class="at">fill=</span> sample)) <span class="sc">+</span> </span>
+<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span> </span>
+<span id="cb18-128"><a href="#cb18-128" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb18-129"><a href="#cb18-129" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">300</span>)</span>
+<span id="cb18-131"><a href="#cb18-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-132"><a href="#cb18-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a><span class="fu">### Fraction of reads mapping to mitochondrial genes</span></span>
+<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a>This metric can identify whether there is a large amount of **mitochondrial contamination from dead or dying cells**. We define poor quality samples for mitochondrial counts as cells which surpass the 0.2 mitochondrial ratio mark, unless of course you are expecting this in your sample.</span>
+<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a><span class="fu">### Joint filtering</span></span>
+<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a>Considering any of these QC metrics in isolation can lead to misinterpretation of cellular signals. For example, cells with a comparatively high fraction of mitochondrial counts may be involved in respiratory processes and may be cells that you would like to keep. Likewise, other metrics can have other biological interpretations. A general rule of thumb when performing QC is to **set thresholds for individual metrics to be as permissive as possible, and always consider the joint effects** of these metrics. In this way, you reduce the risk of filtering out any viable cell populations.</span>
+<span id="cb18-140"><a href="#cb18-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-141"><a href="#cb18-141" aria-hidden="true" tabindex="-1"></a>Two metrics that are often evaluated together are the number of UMIs and the number of genes detected per cell. Here, we have plotted the **number of genes versus the number of UMIs coloured by the fraction of mitochondrial reads**. Jointly visualizing the count and gene thresholds and additionally overlaying the mitochondrial fraction, gives a summarized persepective of the quality per cell.</span>
+<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the correlation between genes detected and number of UMIs and determine whether strong presence of cells with low numbers of genes/UMIs</span></span>
+<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>nUMI, <span class="at">y=</span>nGene, <span class="at">color=</span>mitoRatio)) <span class="sc">+</span> </span>
+<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb18-151"><a href="#cb18-151" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_gradient</span>(<span class="at">low =</span> <span class="st">"gray90"</span>, <span class="at">high =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb18-152"><a href="#cb18-152" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span></span>
+<span id="cb18-153"><a href="#cb18-153" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb18-154"><a href="#cb18-154" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_log10</span>() <span class="sc">+</span> </span>
+<span id="cb18-155"><a href="#cb18-155" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb18-156"><a href="#cb18-156" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">500</span>) <span class="sc">+</span></span>
+<span id="cb18-157"><a href="#cb18-157" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">250</span>) <span class="sc">+</span></span>
+<span id="cb18-158"><a href="#cb18-158" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>sample)</span>
+<span id="cb18-159"><a href="#cb18-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-160"><a href="#cb18-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-161"><a href="#cb18-161" aria-hidden="true" tabindex="-1"></a>Good cells will generally exhibit both higher number of genes per cell and higher numbers of UMIs (upper right quadrant of the plot). Cells that are **poor quality are likely to have low genes and UMIs per cell**, and correspond to the data points in the bottom left quadrant of the plot. With this plot we also evaluate the **slope of the line**, and any scatter of data points in the **bottom right hand quadrant** of the plot. These cells have a high number of UMIs but only a few number of genes. These could be dying cells, but also could represent a population of a low complexity celltype (i.e red blood cells).</span>
+<span id="cb18-162"><a href="#cb18-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-163"><a href="#cb18-163" aria-hidden="true" tabindex="-1"></a>**Mitochondrial read fractions are only high in particularly low count cells with few detected genes** (darker colored data points). This could be indicative of damaged/dying cells whose cytoplasmic mRNA has leaked out through a broken membrane, and thus, only mRNA located in the mitochondria is still conserved. We can see from the plot, that these cells are filtered out by our count and gene number thresholds.</span>
+<span id="cb18-164"><a href="#cb18-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-165"><a href="#cb18-165" aria-hidden="true" tabindex="-1"></a>After deciding on our quality thresholds and filtering the data, we would re-run the plots to ensure good quality metrics post-filtering. Based on the quality filtering, we should now have true cells of high quality and identified any failed samples.</span>
+<span id="cb18-166"><a href="#cb18-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-167"><a href="#cb18-167" aria-hidden="true" tabindex="-1"></a><span class="fu"># Normalization and regressing out unwanted variation</span></span>
+<span id="cb18-168"><a href="#cb18-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-169"><a href="#cb18-169" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb18-170"><a href="#cb18-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-171"><a href="#cb18-171" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To accurately **normalize the gene expression values** to account for differences in sequencing depth and overdispersed count values.*</span>
+<span id="cb18-172"><a href="#cb18-172" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **identify the most variant genes** likely to be indicative of the different cell types present.*</span>
+<span id="cb18-173"><a href="#cb18-173" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>***Checking and removing unwanted variation** so that we do not have cells clustering by artifacts downstream*</span>
+<span id="cb18-174"><a href="#cb18-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-175"><a href="#cb18-175" aria-hidden="true" tabindex="-1"></a>An essential first step in the majority of mRNA expression analyses is normalization, whereby systematic variations are adjusted for to **make expression counts comparable across genes and cells**. The counts of mapped reads for each gene is proportional to the expression of RNA ("interesting") in addition to many other factors ("uninteresting"). Normalization is the process of adjusting raw count values to account for the "uninteresting" factors.</span>
+<span id="cb18-176"><a href="#cb18-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-177"><a href="#cb18-177" aria-hidden="true" tabindex="-1"></a>Before we make any comparisons across cells, we will **apply a simple normalization.** This is solely for the purpose of exploring the sources of variation in our data.</span>
+<span id="cb18-178"><a href="#cb18-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-179"><a href="#cb18-179" aria-hidden="true" tabindex="-1"></a><span class="fu">## Evaluating effects of cell cycle</span></span>
+<span id="cb18-180"><a href="#cb18-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-181"><a href="#cb18-181" aria-hidden="true" tabindex="-1"></a>To assign each cell a score based on its expression of G2/M and S phase markers, we have used the Seurat function <span class="in">`CellCycleScoring()`</span>. This function calculates cell cycle phase scores based on canonical markers that required as input. After scoring the cells for cell cycle, we would like to **determine whether cell cycle is a major source of variation in our dataset using PCA**.</span>
+<span id="cb18-182"><a href="#cb18-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-185"><a href="#cb18-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-186"><a href="#cb18-186" aria-hidden="true" tabindex="-1"></a><span class="co"># Load in the Seurat object</span></span>
+<span id="cb18-187"><a href="#cb18-187" aria-hidden="true" tabindex="-1"></a>seurat_phase <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/QC_seurat_phase Mary Piper.rds"</span>)</span>
+<span id="cb18-188"><a href="#cb18-188" aria-hidden="true" tabindex="-1"></a>seurat_phase</span>
+<span id="cb18-189"><a href="#cb18-189" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-190"><a href="#cb18-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-191"><a href="#cb18-191" aria-hidden="true" tabindex="-1"></a><span class="fu">### Highly variable genes</span></span>
+<span id="cb18-192"><a href="#cb18-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-193"><a href="#cb18-193" aria-hidden="true" tabindex="-1"></a>To perform PCA, we need to **first choose the most variable features, then scale the data**. Since highly expressed genes exhibit the highest amount of variation and we don't want our 'highly variable genes' only to reflect high expression, we need to scale the data to scale variation with expression level.</span>
+<span id="cb18-194"><a href="#cb18-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-195"><a href="#cb18-195" aria-hidden="true" tabindex="-1"></a>Seurat allows us to access the ranked highly variable genes with the <span class="in">`VariableFeatures()`</span> function. We can additionally **visualize the dispersion of all genes using Seurat's `VariableFeaturePlot()`**, which shows a gene's average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the <span class="in">`LabelPoints()`</span> helps us understand which genes will be driving shape of our data.</span>
+<span id="cb18-196"><a href="#cb18-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-197"><a href="#cb18-197" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=10}</span></span>
+<span id="cb18-198"><a href="#cb18-198" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify the 15 most highly variable genes</span></span>
+<span id="cb18-199"><a href="#cb18-199" aria-hidden="true" tabindex="-1"></a>ranked_variable_genes <span class="ot">&lt;-</span> <span class="fu">VariableFeatures</span>(seurat_phase)</span>
+<span id="cb18-200"><a href="#cb18-200" aria-hidden="true" tabindex="-1"></a>top_genes <span class="ot">&lt;-</span> ranked_variable_genes[<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>]</span>
+<span id="cb18-201"><a href="#cb18-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-202"><a href="#cb18-202" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the average expression and variance of these genes</span></span>
+<span id="cb18-203"><a href="#cb18-203" aria-hidden="true" tabindex="-1"></a><span class="co"># With labels to indicate which genes are in the top 15</span></span>
+<span id="cb18-204"><a href="#cb18-204" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">VariableFeaturePlot</span>(seurat_phase)</span>
+<span id="cb18-205"><a href="#cb18-205" aria-hidden="true" tabindex="-1"></a><span class="fu">LabelPoints</span>(<span class="at">plot =</span> p, <span class="at">points =</span> top_genes, <span class="at">repel =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-206"><a href="#cb18-206" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-207"><a href="#cb18-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-208"><a href="#cb18-208" aria-hidden="true" tabindex="-1"></a><span class="fu">### PCA</span></span>
+<span id="cb18-209"><a href="#cb18-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-210"><a href="#cb18-210" aria-hidden="true" tabindex="-1"></a>Principal Component Analysis (PCA) is a technique used to emphasize variation as well as similarity, and to bring out strong patterns in a dataset; it is one of the methods used for *"dimensionality reduction"*.</span>
+<span id="cb18-211"><a href="#cb18-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-212"><a href="#cb18-212" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
+<span id="cb18-213"><a href="#cb18-213" aria-hidden="true" tabindex="-1"></a><span class="fu"># PCA</span></span>
+<span id="cb18-214"><a href="#cb18-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-215"><a href="#cb18-215" aria-hidden="true" tabindex="-1"></a>For a more **detailed explanation on PCA**, please <span class="co">[</span><span class="ot">look over this lesson</span><span class="co">](https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/05_theory_of_PCA.html)</span> (adapted from StatQuests/Josh Starmer's YouTube video). We also strongly encourage you to explore the video <span class="co">[</span><span class="ot">StatQuest's video</span><span class="co">](https://www.youtube.com/watch?v=_UVHneBUBW0)</span> for a more thorough understanding.</span>
+<span id="cb18-216"><a href="#cb18-216" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb18-217"><a href="#cb18-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-218"><a href="#cb18-218" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=10}</span></span>
+<span id="cb18-219"><a href="#cb18-219" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform PCA</span></span>
+<span id="cb18-220"><a href="#cb18-220" aria-hidden="true" tabindex="-1"></a>seurat_phase <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(seurat_phase)</span>
+<span id="cb18-221"><a href="#cb18-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-222"><a href="#cb18-222" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the PCA colored by cell cycle phase</span></span>
+<span id="cb18-223"><a href="#cb18-223" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_phase,</span>
+<span id="cb18-224"><a href="#cb18-224" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"pca"</span>,</span>
+<span id="cb18-225"><a href="#cb18-225" aria-hidden="true" tabindex="-1"></a>        <span class="at">group.by=</span> <span class="st">"Phase"</span>,</span>
+<span id="cb18-226"><a href="#cb18-226" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"Phase"</span>)</span>
+<span id="cb18-227"><a href="#cb18-227" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-228"><a href="#cb18-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-229"><a href="#cb18-229" aria-hidden="true" tabindex="-1"></a>Here, we have performed the PCA analysis using the most highly variable genes and plotted the first two principal components against each other. We have also split the figure by cell cycle phase, to evaluate similarities and/or differences. **We do not see large differences due to cell cycle phase. Based on this plot, we would not regress out the variation due to cell cycle**.</span>
+<span id="cb18-230"><a href="#cb18-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-231"><a href="#cb18-231" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb18-232"><a href="#cb18-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-233"><a href="#cb18-233" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;&lt;b&gt;&lt;i&gt;</span>When should cell cycle phase be regressed out?<span class="kw">&lt;/i&gt;&lt;/b&gt;&lt;/summary&gt;</span></span>
+<span id="cb18-234"><a href="#cb18-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-235"><a href="#cb18-235" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;br&gt;</span>Below are two PCA plots taken from the Seurat vignette dealing with <span class="kw">&lt;a</span> <span class="er">href</span><span class="ot">=</span><span class="st">"https://satijalab.org/seurat/archive/v3.1/cell_cycle_vignette.html"</span><span class="kw">&gt;</span>Cell-Cycle Scoring and Regression<span class="kw">&lt;/a&gt;</span>.<span class="kw">&lt;br&gt;</span></span>
+<span id="cb18-236"><a href="#cb18-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-237"><a href="#cb18-237" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;ul&gt;</span></span>
+<span id="cb18-238"><a href="#cb18-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-239"><a href="#cb18-239" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;li&gt;</span>This first plot is similar to what we plotted above, it is a PCA prior to regression to evaluate if the cell cycle is playing a big role in driving PC1 and PC2. Clearly, the cells are separating by cell type in this case, so the vignette suggests regressing out these effects.<span class="kw">&lt;/li&gt;</span></span>
+<span id="cb18-240"><a href="#cb18-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-241"><a href="#cb18-241" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb18-242"><a href="#cb18-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-243"><a href="#cb18-243" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-244"><a href="#cb18-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-245"><a href="#cb18-245" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/cell_cycle_not_regressed.png"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"400"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-246"><a href="#cb18-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-247"><a href="#cb18-247" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-248"><a href="#cb18-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-249"><a href="#cb18-249" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;ul&gt;</span></span>
+<span id="cb18-250"><a href="#cb18-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-251"><a href="#cb18-251" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;li&gt;</span>This second PCA plot is <span class="kw">&lt;b&gt;</span>post-regression<span class="kw">&lt;/b&gt;</span>, and displays how effective the regression was in removing the effect we observed.<span class="kw">&lt;/li&gt;</span></span>
+<span id="cb18-252"><a href="#cb18-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-253"><a href="#cb18-253" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb18-254"><a href="#cb18-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-255"><a href="#cb18-255" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-256"><a href="#cb18-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-257"><a href="#cb18-257" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/cell_cycle_regressed.png"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"400"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-258"><a href="#cb18-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-259"><a href="#cb18-259" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-260"><a href="#cb18-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-261"><a href="#cb18-261" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
+<span id="cb18-262"><a href="#cb18-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-263"><a href="#cb18-263" aria-hidden="true" tabindex="-1"></a><span class="fu">## SCTransform</span></span>
+<span id="cb18-264"><a href="#cb18-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-265"><a href="#cb18-265" aria-hidden="true" tabindex="-1"></a>In the <span class="co">[</span><span class="ot">Hafemeister and Satija, 2019 paper</span><span class="co">](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1)</span> the authors explored the issues with simple transformations. Specifically they evaluated the standard log normalization approach and found that:</span>
+<span id="cb18-266"><a href="#cb18-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-267"><a href="#cb18-267" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>genes with different abundances are affected differently and that <span class="sc">\*\*</span>effective normalization (using the log transform) is only observed with low/medium abundance genes (Figure 1D, below)</span>
+<span id="cb18-268"><a href="#cb18-268" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>substantial imbalances in variance were observed with the log-normalized data (Figure 1E, below)</span>
+<span id="cb18-269"><a href="#cb18-269" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>cells with low total UMI counts exhibited disproportionately higher variance for high-abundance genes, dampening the variance contribution from other gene abundances</span>
+<span id="cb18-270"><a href="#cb18-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-271"><a href="#cb18-271" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-272"><a href="#cb18-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-273"><a href="#cb18-273" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/SCT_Fig1.png"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"600"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-274"><a href="#cb18-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-275"><a href="#cb18-275" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-276"><a href="#cb18-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-277"><a href="#cb18-277" aria-hidden="true" tabindex="-1"></a>***Image credit:** Hafemeister C and Satija R. Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression, Genom Biology 2019 (https://doi.org/10.1101/576827)*</span>
+<span id="cb18-278"><a href="#cb18-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-279"><a href="#cb18-279" aria-hidden="true" tabindex="-1"></a>The conclusion is, **we cannot treat all genes the same.**</span>
+<span id="cb18-280"><a href="#cb18-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-281"><a href="#cb18-281" aria-hidden="true" tabindex="-1"></a>The proposed solution was the use of **Pearson residuals for transformation**, as implemented in Seurat's <span class="in">`SCTransform`</span> function. With this approach:</span>
+<span id="cb18-282"><a href="#cb18-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-283"><a href="#cb18-283" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Measurements are multiplied by a gene-specific weight</span>
+<span id="cb18-284"><a href="#cb18-284" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Each gene is weighted based on how much evidence there is that it is non-uniformly expressed across cells</span>
+<span id="cb18-285"><a href="#cb18-285" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>More evidence == more of a weight; Genes that are expressed in only a small fraction of cells will be favored (useful for finding rare cell populations)</span>
+<span id="cb18-286"><a href="#cb18-286" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Not just a consideration of the expression level is, but also the distribution of expression</span>
+<span id="cb18-287"><a href="#cb18-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-288"><a href="#cb18-288" aria-hidden="true" tabindex="-1"></a><span class="fu"># Integration</span></span>
+<span id="cb18-289"><a href="#cb18-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-290"><a href="#cb18-290" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb18-291"><a href="#cb18-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-292"><a href="#cb18-292" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **align same cell types** so as not to have clustering downstream driven by differences between samples, conditions, modalities, or batches.*</span>
+<span id="cb18-293"><a href="#cb18-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-294"><a href="#cb18-294" aria-hidden="true" tabindex="-1"></a><span class="fu">## To integrate or not to integrate?</span></span>
+<span id="cb18-295"><a href="#cb18-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-296"><a href="#cb18-296" aria-hidden="true" tabindex="-1"></a>Generally, we always look at our clustering **without integration** before deciding whether we need to perform any alignment. **Do not just always perform integration because you think there might be differences - explore the data.** If we had performed the normalization on both conditions together in a Seurat object and visualized the similarity between cells, we would have seen condition-specific clustering:</span>
+<span id="cb18-297"><a href="#cb18-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-298"><a href="#cb18-298" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
+<span id="cb18-299"><a href="#cb18-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-300"><a href="#cb18-300" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"img/unintegrated_umap.png"</span> <span class="er">width</span><span class="ot">=</span><span class="st">"600"</span><span class="kw">/&gt;</span></span>
+<span id="cb18-301"><a href="#cb18-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-302"><a href="#cb18-302" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb18-303"><a href="#cb18-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-304"><a href="#cb18-304" aria-hidden="true" tabindex="-1"></a>Condition-specific clustering of the cells indicates that we need to integrate the cells across conditions to ensure that cells of the same cell type cluster together.</span>
+<span id="cb18-305"><a href="#cb18-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-306"><a href="#cb18-306" aria-hidden="true" tabindex="-1"></a>**Why is it important the cells of the same cell type cluster together?**</span>
+<span id="cb18-307"><a href="#cb18-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-308"><a href="#cb18-308" aria-hidden="true" tabindex="-1"></a>We want to identify ***cell types which are present in all samples/conditions/modalities*** within our dataset, and therefore would like to observe a representation of cells from both samples/conditions/modalities in every cluster. This will enable more interpretable results downstream (i.e. DE analysis, ligand-receptor analysis, differential abundance analysis...).</span>
+<span id="cb18-309"><a href="#cb18-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-310"><a href="#cb18-310" aria-hidden="true" tabindex="-1"></a><span class="fu">## Approaches for integration</span></span>
+<span id="cb18-311"><a href="#cb18-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-312"><a href="#cb18-312" aria-hidden="true" tabindex="-1"></a>To integrate, we will use the shared highly variable genes (identified using SCTransform) from each group, then, we will "integrate" or "harmonize" the groups to overlay cells that are similar or have a "common set of biological features" between groups. Integration is a powerful method that **uses these shared sources of greatest variation to identify shared subpopulations across conditions or datasets** <span class="sc">\[</span><span class="co">[</span><span class="ot">Stuart and Bulter et al. (2018)</span><span class="co">](https://www.biorxiv.org/content/early/2018/11/02/460147)</span><span class="sc">\]</span>. The goal of integration is to ensure that the cell types of one condition/dataset align with the same celltypes of the other conditions/datasets (e.g. macrophages in one sample align with macrophages in the other samples).</span>
+<span id="cb18-313"><a href="#cb18-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-314"><a href="#cb18-314" aria-hidden="true" tabindex="-1"></a><span class="fu">### Canonical Correlation Analysis (CCA)</span></span>
+<span id="cb18-315"><a href="#cb18-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-316"><a href="#cb18-316" aria-hidden="true" tabindex="-1"></a>CCA is a form of PCA, in that it identifies the greatest sources of variation in the data, but only if it is shared or conserved across the conditions/groups (using the 3000 most variant genes from each sample). The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</span>
+<span id="cb18-317"><a href="#cb18-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-318"><a href="#cb18-318" aria-hidden="true" tabindex="-1"></a><span class="fu">### Harmony</span></span>
+<span id="cb18-319"><a href="#cb18-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-320"><a href="#cb18-320" aria-hidden="true" tabindex="-1"></a>Harmony was devleoped in 2019, and is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony applies a transformation to the principal component (PCs) values, using all available PCs, e.g. as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum "diversity".</span>
+<span id="cb18-321"><a href="#cb18-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-322"><a href="#cb18-322" aria-hidden="true" tabindex="-1"></a>For this dataset, we applied CCA integration. To **evaluate the effect of integration**, we can visualize the aligned data in a UMAP to ensure we now have proper alignment across our samples.</span>
+<span id="cb18-323"><a href="#cb18-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-326"><a href="#cb18-326" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-327"><a href="#cb18-327" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP</span></span>
+<span id="cb18-328"><a href="#cb18-328" aria-hidden="true" tabindex="-1"></a>seurat_integrated <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/integrated_seurat Mary Piper.rds"</span>)</span>
+<span id="cb18-329"><a href="#cb18-329" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated)  </span>
+<span id="cb18-330"><a href="#cb18-330" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-331"><a href="#cb18-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-332"><a href="#cb18-332" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
+<span id="cb18-333"><a href="#cb18-333" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP split by sample</span></span>
+<span id="cb18-334"><a href="#cb18-334" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated,</span>
+<span id="cb18-335"><a href="#cb18-335" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"sample"</span>)  </span>
+<span id="cb18-336"><a href="#cb18-336" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-337"><a href="#cb18-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-338"><a href="#cb18-338" aria-hidden="true" tabindex="-1"></a><span class="fu"># Clustering cells</span></span>
+<span id="cb18-339"><a href="#cb18-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-340"><a href="#cb18-340" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb18-341"><a href="#cb18-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-342"><a href="#cb18-342" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **generate cell type-specific clusters** and use known cell type marker genes to determine the identities of the clusters.*</span>
+<span id="cb18-343"><a href="#cb18-343" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*</span>
+<span id="cb18-344"><a href="#cb18-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-345"><a href="#cb18-345" aria-hidden="true" tabindex="-1"></a>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' <span class="sc">\[</span><span class="co">[</span><span class="ot">Seurat - Guided Clustering Tutorial</span><span class="co">](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)</span><span class="sc">\]</span>. A nice in-depth description of clustering methods is provided in the <span class="co">[</span><span class="ot">SVI Bioinformatics and Cellular Genomics Lab course</span><span class="co">](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html)</span>.</span>
+<span id="cb18-346"><a href="#cb18-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-347"><a href="#cb18-347" aria-hidden="true" tabindex="-1"></a>The <span class="in">`resolution`</span> is an important argument that sets the "granularity" of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <span class="in">`resolution`</span> set between <span class="in">`0.4`</span>-<span class="in">`1.4`</span> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</span>
+<span id="cb18-348"><a href="#cb18-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-349"><a href="#cb18-349" aria-hidden="true" tabindex="-1"></a>To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the <span class="co">[</span><span class="ot">UMAP method</span><span class="co">](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)</span> for **visualizing the clusters at a resolution of 0.8**.</span>
+<span id="cb18-350"><a href="#cb18-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-353"><a href="#cb18-353" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-354"><a href="#cb18-354" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign identity of clusters</span></span>
+<span id="cb18-355"><a href="#cb18-355" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/clustering_integrated_seurat.rds"</span>)</span>
+<span id="cb18-356"><a href="#cb18-356" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> seurat_clustered) <span class="ot">&lt;-</span> <span class="st">"integrated_snn_res.0.8"</span></span>
+<span id="cb18-357"><a href="#cb18-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-358"><a href="#cb18-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-359"><a href="#cb18-359" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb18-360"><a href="#cb18-360" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_clustered,</span>
+<span id="cb18-361"><a href="#cb18-361" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>,</span>
+<span id="cb18-362"><a href="#cb18-362" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-363"><a href="#cb18-363" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">6</span>)</span>
+<span id="cb18-364"><a href="#cb18-364" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-365"><a href="#cb18-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-366"><a href="#cb18-366" aria-hidden="true" tabindex="-1"></a><span class="fu"># Cluster QC and identification of cell types</span></span>
+<span id="cb18-367"><a href="#cb18-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-368"><a href="#cb18-368" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb18-369"><a href="#cb18-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-370"><a href="#cb18-370" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*</span>
+<span id="cb18-371"><a href="#cb18-371" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To use known cell type marker genes to **determine the identities of the clusters**.*</span>
+<span id="cb18-372"><a href="#cb18-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-373"><a href="#cb18-373" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploration of QC metrics</span></span>
+<span id="cb18-374"><a href="#cb18-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-375"><a href="#cb18-375" aria-hidden="true" tabindex="-1"></a>Let's begin by using a **barplot** to take a look at the **number of cells per cluster**, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.</span>
+<span id="cb18-376"><a href="#cb18-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-377"><a href="#cb18-377" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15, fig.height=6}</span></span>
+<span id="cb18-378"><a href="#cb18-378" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract identity and sample information from seurat object to </span></span>
+<span id="cb18-379"><a href="#cb18-379" aria-hidden="true" tabindex="-1"></a><span class="co"># determine the number of cells per cluster per sample</span></span>
+<span id="cb18-380"><a href="#cb18-380" aria-hidden="true" tabindex="-1"></a>n_cells <span class="ot">&lt;-</span> <span class="fu">FetchData</span>(seurat_clustered, </span>
+<span id="cb18-381"><a href="#cb18-381" aria-hidden="true" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"ident"</span>, <span class="st">"sample"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-382"><a href="#cb18-382" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">count</span>(ident, sample)</span>
+<span id="cb18-383"><a href="#cb18-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-384"><a href="#cb18-384" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot of number of cells per cluster by sample</span></span>
+<span id="cb18-385"><a href="#cb18-385" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(n_cells, <span class="fu">aes</span>(<span class="at">x=</span>ident, <span class="at">y=</span>n, <span class="at">fill=</span>sample)) <span class="sc">+</span></span>
+<span id="cb18-386"><a href="#cb18-386" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="fu">position_dodge</span>(), <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb18-387"><a href="#cb18-387" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>n), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">2</span>, <span class="at">position=</span><span class="fu">position_dodge</span>(<span class="dv">1</span>))</span>
+<span id="cb18-388"><a href="#cb18-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-389"><a href="#cb18-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-390"><a href="#cb18-390" aria-hidden="true" tabindex="-1"></a>To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore various metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. If enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the particular cell type.</span>
+<span id="cb18-391"><a href="#cb18-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-392"><a href="#cb18-392" aria-hidden="true" tabindex="-1"></a>Next let's explore these metrics by overlaying them on the UMAP using a **FeaturePlot**:</span>
+<span id="cb18-393"><a href="#cb18-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-394"><a href="#cb18-394" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.height=10}</span></span>
+<span id="cb18-395"><a href="#cb18-395" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine metrics to plot present in seurat_integrated@meta.data</span></span>
+<span id="cb18-396"><a href="#cb18-396" aria-hidden="true" tabindex="-1"></a>metrics <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"nUMI"</span>, <span class="st">"nGene"</span>, <span class="st">"S.Score"</span>, <span class="st">"G2M.Score"</span>, <span class="st">"mitoRatio"</span>)</span>
+<span id="cb18-397"><a href="#cb18-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-398"><a href="#cb18-398" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb18-399"><a href="#cb18-399" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb18-400"><a href="#cb18-400" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> metrics,</span>
+<span id="cb18-401"><a href="#cb18-401" aria-hidden="true" tabindex="-1"></a>            <span class="at">pt.size =</span> <span class="fl">0.4</span>, </span>
+<span id="cb18-402"><a href="#cb18-402" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-403"><a href="#cb18-403" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>,</span>
+<span id="cb18-404"><a href="#cb18-404" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-405"><a href="#cb18-405" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-406"><a href="#cb18-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-407"><a href="#cb18-407" aria-hidden="true" tabindex="-1"></a>With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster and more **quantitatively assess the differences**. The corresponding UMAP is displayed for comparison.</span>
+<span id="cb18-408"><a href="#cb18-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-411"><a href="#cb18-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb18-412"><a href="#cb18-412" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplot of nGene per cluster</span></span>
+<span id="cb18-413"><a href="#cb18-413" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seurat_clustered<span class="sc">@</span>meta.data) <span class="sc">+</span></span>
+<span id="cb18-414"><a href="#cb18-414" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>integrated_snn_res.<span class="fl">0.8</span>, <span class="at">y=</span>nGene, <span class="at">fill=</span>integrated_snn_res.<span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb18-415"><a href="#cb18-415" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NoLegend</span>()</span>
+<span id="cb18-416"><a href="#cb18-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-417"><a href="#cb18-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-418"><a href="#cb18-418" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploring known celltype markers</span></span>
+<span id="cb18-419"><a href="#cb18-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-420"><a href="#cb18-420" aria-hidden="true" tabindex="-1"></a>We can explore the different clusters and best identify their cell type identities by looking at expression of known marker genes. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. In teh example below, **CD14+ monocyte markers** appear to correspond to clusters 1, and 3. We wouldn't include clusters 14 and 10 because they do not highly express both of these markers.</span>
+<span id="cb18-421"><a href="#cb18-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-422"><a href="#cb18-422" aria-hidden="true" tabindex="-1"></a><span class="fu">### Feature Plot</span></span>
+<span id="cb18-423"><a href="#cb18-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-424"><a href="#cb18-424" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
+<span id="cb18-425"><a href="#cb18-425" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb18-426"><a href="#cb18-426" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb18-427"><a href="#cb18-427" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>), </span>
+<span id="cb18-428"><a href="#cb18-428" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-429"><a href="#cb18-429" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>, </span>
+<span id="cb18-430"><a href="#cb18-430" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-431"><a href="#cb18-431" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-432"><a href="#cb18-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-433"><a href="#cb18-433" aria-hidden="true" tabindex="-1"></a><span class="fu">### Violin plot</span></span>
+<span id="cb18-434"><a href="#cb18-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-435"><a href="#cb18-435" aria-hidden="true" tabindex="-1"></a>We can also explore the range in expression of specific markers by using **violin plots**. Violin plots are similar to box plots, except that they **also show the probability density of the data at different values**, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the **full distribution of the data**. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.</span>
+<span id="cb18-436"><a href="#cb18-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-437"><a href="#cb18-437" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=18, fig.height=6}</span></span>
+<span id="cb18-438"><a href="#cb18-438" aria-hidden="true" tabindex="-1"></a><span class="co"># Violin plot - CD14+ monocyte</span></span>
+<span id="cb18-439"><a href="#cb18-439" aria-hidden="true" tabindex="-1"></a><span class="fu">VlnPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb18-440"><a href="#cb18-440" aria-hidden="true" tabindex="-1"></a>        <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>))</span>
+<span id="cb18-441"><a href="#cb18-441" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-442"><a href="#cb18-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-443"><a href="#cb18-443" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dotplot</span></span>
+<span id="cb18-444"><a href="#cb18-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-445"><a href="#cb18-445" aria-hidden="true" tabindex="-1"></a>While the above plot allows you to explore one celltype at a time, Seurat also has a built in **visualization tool which allows us to view the average expression of genes across clusters called DotPlot()**. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.</span>
+<span id="cb18-446"><a href="#cb18-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-447"><a href="#cb18-447" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15}</span></span>
+<span id="cb18-448"><a href="#cb18-448" aria-hidden="true" tabindex="-1"></a><span class="co"># List of known celltype markers</span></span>
+<span id="cb18-449"><a href="#cb18-449" aria-hidden="true" tabindex="-1"></a>markers <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb18-450"><a href="#cb18-450" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"CD14+ monocytes"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>)</span>
+<span id="cb18-451"><a href="#cb18-451" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"FCGR3A+ monocyte"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCGR3A"</span>, <span class="st">"MS4A7"</span>)</span>
+<span id="cb18-452"><a href="#cb18-452" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Macrophages"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"MARCO"</span>, <span class="st">"ITGAM"</span>, <span class="st">"ADGRE1"</span>)</span>
+<span id="cb18-453"><a href="#cb18-453" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Conventional dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCER1A"</span>, <span class="st">"CST3"</span>)</span>
+<span id="cb18-454"><a href="#cb18-454" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Plasmacytoid dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"IL3RA"</span>, <span class="st">"GZMB"</span>, <span class="st">"SERPINF1"</span>, <span class="st">"ITM2C"</span>)</span>
+<span id="cb18-455"><a href="#cb18-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-456"><a href="#cb18-456" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dotplot based on RNA expression</span></span>
+<span id="cb18-457"><a href="#cb18-457" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(seurat_clustered, markers, <span class="at">assay=</span><span class="st">"RNA"</span>)</span>
+<span id="cb18-458"><a href="#cb18-458" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-459"><a href="#cb18-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-460"><a href="#cb18-460" aria-hidden="true" tabindex="-1"></a><span class="fu">## Celltype assignment</span></span>
+<span id="cb18-461"><a href="#cb18-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-462"><a href="#cb18-462" aria-hidden="true" tabindex="-1"></a>After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers. Once we have identified the cell types, we can **assign the cell type names to each cluster**.</span>
+<span id="cb18-463"><a href="#cb18-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-464"><a href="#cb18-464" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=7}</span></span>
+<span id="cb18-465"><a href="#cb18-465" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename all identities</span></span>
+<span id="cb18-466"><a href="#cb18-466" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb18-467"><a href="#cb18-467" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"0"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb18-468"><a href="#cb18-468" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>,</span>
+<span id="cb18-469"><a href="#cb18-469" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb18-470"><a href="#cb18-470" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb18-471"><a href="#cb18-471" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"Stressed cells / Unknown"</span>,</span>
+<span id="cb18-472"><a href="#cb18-472" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb18-473"><a href="#cb18-473" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb18-474"><a href="#cb18-474" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb18-475"><a href="#cb18-475" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb18-476"><a href="#cb18-476" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb18-477"><a href="#cb18-477" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"10"</span> <span class="ot">=</span> <span class="st">"FCGR3A+ monocytes"</span>,</span>
+<span id="cb18-478"><a href="#cb18-478" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"11"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb18-479"><a href="#cb18-479" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"12"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb18-480"><a href="#cb18-480" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"13"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb18-481"><a href="#cb18-481" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"14"</span> <span class="ot">=</span> <span class="st">"Conventional dendritic cells"</span>,</span>
+<span id="cb18-482"><a href="#cb18-482" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"15"</span> <span class="ot">=</span> <span class="st">"Megakaryocytes"</span>,</span>
+<span id="cb18-483"><a href="#cb18-483" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"16"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>, </span>
+<span id="cb18-484"><a href="#cb18-484" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"17"</span> <span class="ot">=</span> <span class="st">"Plasmacytoid dendritic cells"</span>,</span>
+<span id="cb18-485"><a href="#cb18-485" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"18"</span> <span class="ot">=</span> <span class="st">"Unknown"</span>)</span>
+<span id="cb18-486"><a href="#cb18-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-487"><a href="#cb18-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-488"><a href="#cb18-488" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb18-489"><a href="#cb18-489" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb18-490"><a href="#cb18-490" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb18-491"><a href="#cb18-491" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-492"><a href="#cb18-492" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">3</span>,</span>
+<span id="cb18-493"><a href="#cb18-493" aria-hidden="true" tabindex="-1"></a>        <span class="at">repel =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-494"><a href="#cb18-494" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-495"><a href="#cb18-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-496"><a href="#cb18-496" aria-hidden="true" tabindex="-1"></a>After we have finished identifying cell types, often additional work is needed for validation or addressing additional questions. Some additional downstream work could include:</span>
+<span id="cb18-497"><a href="#cb18-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-498"><a href="#cb18-498" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Experimentally validate intriguing markers for our identified cell types.</span>
+<span id="cb18-499"><a href="#cb18-499" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Explore a subset of the cell types to discover subclusters of cells as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/seurat_subclustering.html)</span></span>
+<span id="cb18-500"><a href="#cb18-500" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Differential expression analysis within a particular cell type or subcluster.</span>
+<span id="cb18-501"><a href="#cb18-501" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Trajectory analysis, or lineage tracing, could be performed if trying to determine the progression between cell types or cell states. For example, we could explore any of the following using this type of analysis:</span>
+<span id="cb18-502"><a href="#cb18-502" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Differentiation processes</span>
+<span id="cb18-503"><a href="#cb18-503" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Expression changes over time</span>
+<span id="cb18-504"><a href="#cb18-504" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Cell state changes in expression</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">This lesson has been developed by members of the teaching team at the <a href="http://bioinformatics.sph.harvard.edu/">Harvard Chan Bioinformatics Core (HBC)</a>. <br> These are open access materials distributed under the terms of the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution license</a> (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited. <br> A portion of these materials and hands-on activities were adapted from the <a href="https://satijalab.org/">Satija Lab’s</a> <a href="https://satijalab.org/seurat/pbmc3k_tutorial.html">Seurat - Guided Clustering Tutorial</a></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>
