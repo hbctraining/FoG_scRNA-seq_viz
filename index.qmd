@@ -99,6 +99,7 @@ library(Seurat)
 library(tidyverse)
 
 # Read in metadata
+# metadata <- seurat@meta.data
 metadata <- readRDS("data/QC_metadata.rds")
 
 # Visualize the number of cell counts per sample
@@ -187,26 +188,11 @@ seurat_phase <- readRDS("data/QC_seurat_phase.rds")
 seurat_phase
 ```
 
-### Highly variable genes
-
-To perform PCA, we need to **first choose the most variable features, then scale the data**. Since highly expressed genes exhibit the highest amount of variation and we don't want our 'highly variable genes' only to reflect high expression, we need to scale the data to scale variation with expression level.
-
-Seurat allows us to access the ranked highly variable genes with the `VariableFeatures()` function. We can additionally **visualize the dispersion of all genes using Seurat's `VariableFeaturePlot()`**, which shows a gene's average expression across all cells on the x-axis and variance on the y-axis. Ideally we want to use genes that have high variance since this can indicate a change in expression depending on populations of cells. Adding labels using the `LabelPoints()` helps us understand which genes will be driving shape of our data.
-
-```{r fig.width=10}
-# Identify the 15 most highly variable genes
-ranked_variable_genes <- VariableFeatures(seurat_phase)
-top_genes <- ranked_variable_genes[1:15]
-
-# Plot the average expression and variance of these genes
-# With labels to indicate which genes are in the top 15
-p <- VariableFeaturePlot(seurat_phase)
-LabelPoints(plot = p, points = top_genes, repel = TRUE)
-```
-
 ### PCA
 
 Principal Component Analysis (PCA) is a technique used to emphasize variation as well as similarity, and to bring out strong patterns in a dataset; it is one of the methods used for *"dimensionality reduction"*.
+
+To perform PCA, normalize the count data (for sequencing depth), choose the most variable features, then scale the data. Since highly expressed genes exhibit the highest amount of variation and we don’t want our ‘highly variable genes’ only to reflect high expression, we need to scale the data to scale variation with expression level. 
 
 ::: callout-note
 # PCA
