@@ -554,7 +554,7 @@ Note
 <h1>Clustering cells</h1>
 <p><strong><em>Goals:</em></strong></p>
 <ul>
-<li>*To <strong>generate cell type-specific clusters</strong> using k-nearest neighbor approach</li>
+<li><em>To <strong>generate cell type-specific clusters</strong> using k-nearest neighbor approach</em></li>
 </ul>
 <p>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected ‘quasi-cliques’ or ‘communities’ [<a href="https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html">Seurat - Guided Clustering Tutorial</a>]. A nice in-depth description of clustering methods is provided in the <a href="https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html">SVI Bioinformatics and Cellular Genomics Lab course</a>.</p>
 <p>The <code>resolution</code> is an important argument that sets the “granularity” of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <code>resolution</code> set between <code>0.4</code>-<code>1.4</code> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</p>
@@ -1360,7 +1360,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb17-350"><a href="#cb17-350" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-351"><a href="#cb17-351" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
 <span id="cb17-352"><a href="#cb17-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-353"><a href="#cb17-353" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **generate cell type-specific clusters** using k-nearest neighbor approach</span>
+<span id="cb17-353"><a href="#cb17-353" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>_To **generate cell type-specific clusters** using k-nearest neighbor approach_</span>
 <span id="cb17-354"><a href="#cb17-354" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-355"><a href="#cb17-355" aria-hidden="true" tabindex="-1"></a>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' <span class="sc">\[</span><span class="co">[</span><span class="ot">Seurat - Guided Clustering Tutorial</span><span class="co">](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)</span><span class="sc">\]</span>. A nice in-depth description of clustering methods is provided in the <span class="co">[</span><span class="ot">SVI Bioinformatics and Cellular Genomics Lab course</span><span class="co">](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html)</span>.</span>
 <span id="cb17-356"><a href="#cb17-356" aria-hidden="true" tabindex="-1"></a></span>

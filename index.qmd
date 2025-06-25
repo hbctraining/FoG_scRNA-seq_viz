@@ -340,7 +340,7 @@ DimPlot(seurat_integrated,
 
 ***Goals:***
 
--   *To **generate cell type-specific clusters** using k-nearest neighbor approach
+-   _To **generate cell type-specific clusters** using k-nearest neighbor approach_
 
 Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' \[[Seurat - Guided Clustering Tutorial](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)\]. A nice in-depth description of clustering methods is provided in the [SVI Bioinformatics and Cellular Genomics Lab course](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html).
 
