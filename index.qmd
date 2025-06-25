@@ -83,7 +83,7 @@ By default, the tools used to generate the count matrix should also provide meta
 
 <p align="center">
 
-<img src="../img/merged_seurat_meta.png" width="600"/>
+<img src="img/merged_seurat_meta.png" width="600"/>
 
 </p>
 
@@ -91,7 +91,7 @@ We often calculate additional metrics for assessing the quality of our dataset.
 
 <p align="center">
 
-<img src="../img/metadata_scrnaseq_new.png" width="900"/>
+<img src="img/metadata_scrnaseq_new.png" width="900"/>
 
 </p>
 
