@@ -305,16 +305,16 @@ Condition-specific clustering of the cells indicates that we need to integrate t
 We want to identify ***cell types which are present in all samples/conditions/modalities*** within our dataset, and therefore would like to observe a representation of cells from both samples/conditions/modalities in every cluster. This will enable more interpretable results downstream (i.e. DE analysis, ligand-receptor analysis, differential abundance analysis...).
 
 ## Approaches for integration
-
-To integrate, we will use the shared highly variable genes (identified using SCTransform) from each group, then, we will "integrate" or "harmonize" the groups to overlay cells that are similar or have a "common set of biological features" between groups. Integration is a powerful method that **uses these shared sources of greatest variation to identify shared subpopulations across conditions or datasets** \[[Stuart and Bulter et al. (2018)](https://www.biorxiv.org/content/early/2018/11/02/460147)\]. The goal of integration is to ensure that the cell types of one condition/dataset align with the same celltypes of the other conditions/datasets (e.g. macrophages in one sample align with macrophages in the other samples).
+To align with the same celltypes of the other conditions/datasets (e.g. macrophages in one sample align with macrophages in the other samples), there are various methods that can be applied. Here, we discuss two common approaches used in the field.
 
 ### Canonical Correlation Analysis (CCA)
+CCA is a form of PCA, that **uses shared sources of greatest variation to identify shared subpopulations across conditions or datasets** \[[Stuart and Bulter et al. (2018)](https://www.biorxiv.org/content/early/2018/11/02/460147)\]. The shared highly variable genes from each dataset are used to form the intersection set, because they are the most likely to represent those genes distinguishing the different cell types present.
 
-CCA is a form of PCA, in that it identifies the greatest sources of variation in the data, but only if it is shared or conserved across the conditions/groups (using the 3000 most variant genes from each sample). The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.
+The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.
 
 ### Harmony
 
-Harmony was devleoped in 2019, and is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony applies a transformation to the principal component (PCs) values, using all available PCs, e.g. as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum "diversity".
+Harmony [(Korsunsky et al. 2019](https://www.nature.com/articles/s41592-019-0619-0), is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony **applies a transformation to the principal component (PCs) values**, using all available PCs, e.g. as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum "diversity".
 
 For this dataset, we applied CCA integration. To **evaluate the effect of integration**, we can visualize the aligned data in a UMAP to ensure we now have proper alignment across our samples.
 
@@ -323,6 +323,12 @@ For this dataset, we applied CCA integration. To **evaluate the effect of integr
 seurat_integrated <- readRDS("data/integrated_seurat.rds")
 DimPlot(seurat_integrated)  
 ```
+
+::: callout-note
+
+We could have plotted a PCA, however we can only plot two PCs at a time. In contrast, **UMAP will take the information from any number of top PCs** to arrange the cells in this multidimensional space. It will take those distances in multidimensional space and **plot them in two dimensions working to preserve local and global structure**. In this way, the distances between cells represent similarity in expression. If you wish to explore UMAP in more detail, [this post](https://pair-code.github.io/understanding-umap/) is a nice introduction to UMAP theory.
+
+:::
 
 ```{r fig.width=8}
 # Plot UMAP split by sample
@@ -334,8 +340,7 @@ DimPlot(seurat_integrated,
 
 ***Goals:***
 
--   *To **generate cell type-specific clusters** and use known cell type marker genes to determine the identities of the clusters.*
--   *To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*
+-   *To **generate cell type-specific clusters** using k-nearest neighbor approach
 
 Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' \[[Seurat - Guided Clustering Tutorial](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)\]. A nice in-depth description of clustering methods is provided in the [SVI Bioinformatics and Cellular Genomics Lab course](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html).
 

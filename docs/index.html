@@ -508,14 +508,15 @@ This second PCA plot is <b>post-regression</b>, and displays how effective the r
 </section>
 <section id="approaches-for-integration" class="level2">
 <h2 class="anchored" data-anchor-id="approaches-for-integration">Approaches for integration</h2>
-<p>To integrate, we will use the shared highly variable genes (identified using SCTransform) from each group, then, we will “integrate” or “harmonize” the groups to overlay cells that are similar or have a “common set of biological features” between groups. Integration is a powerful method that <strong>uses these shared sources of greatest variation to identify shared subpopulations across conditions or datasets</strong> [<a href="https://www.biorxiv.org/content/early/2018/11/02/460147">Stuart and Bulter et al.&nbsp;(2018)</a>]. The goal of integration is to ensure that the cell types of one condition/dataset align with the same celltypes of the other conditions/datasets (e.g.&nbsp;macrophages in one sample align with macrophages in the other samples).</p>
+<p>To align with the same celltypes of the other conditions/datasets (e.g.&nbsp;macrophages in one sample align with macrophages in the other samples), there are various methods that can be applied. Here, we discuss two common approaches used in the field.</p>
 <section id="canonical-correlation-analysis-cca" class="level3">
 <h3 class="anchored" data-anchor-id="canonical-correlation-analysis-cca">Canonical Correlation Analysis (CCA)</h3>
-<p>CCA is a form of PCA, in that it identifies the greatest sources of variation in the data, but only if it is shared or conserved across the conditions/groups (using the 3000 most variant genes from each sample). The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</p>
+<p>CCA is a form of PCA, that <strong>uses shared sources of greatest variation to identify shared subpopulations across conditions or datasets</strong> [<a href="https://www.biorxiv.org/content/early/2018/11/02/460147">Stuart and Bulter et al.&nbsp;(2018)</a>]. The shared highly variable genes from each dataset are used to form the intersection set, because they are the most likely to represent those genes distinguishing the different cell types present.</p>
+<p>The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</p>
 </section>
 <section id="harmony" class="level3">
 <h3 class="anchored" data-anchor-id="harmony">Harmony</h3>
-<p>Harmony was devleoped in 2019, and is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony applies a transformation to the principal component (PCs) values, using all available PCs, e.g.&nbsp;as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum “diversity”.</p>
+<p>Harmony <a href="https://www.nature.com/articles/s41592-019-0619-0">(Korsunsky et al.&nbsp;2019</a>, is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony <strong>applies a transformation to the principal component (PCs) values</strong>, using all available PCs, e.g.&nbsp;as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum “diversity”.</p>
 <p>For this dataset, we applied CCA integration. To <strong>evaluate the effect of integration</strong>, we can visualize the aligned data in a UMAP to ensure we now have proper alignment across our samples.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP</span></span>
@@ -523,6 +524,19 @@ This second PCA plot is <b>post-regression</b>, and displays how effective the r
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We could have plotted a PCA, however we can only plot two PCs at a time. In contrast, <strong>UMAP will take the information from any number of top PCs</strong> to arrange the cells in this multidimensional space. It will take those distances in multidimensional space and <strong>plot them in two dimensions working to preserve local and global structure</strong>. In this way, the distances between cells represent similarity in expression. If you wish to explore UMAP in more detail, <a href="https://pair-code.github.io/understanding-umap/">this post</a> is a nice introduction to UMAP theory.</p>
 </div>
 </div>
 <div class="cell">
@@ -540,8 +554,7 @@ This second PCA plot is <b>post-regression</b>, and displays how effective the r
 <h1>Clustering cells</h1>
 <p><strong><em>Goals:</em></strong></p>
 <ul>
-<li><em>To <strong>generate cell type-specific clusters</strong> and use known cell type marker genes to determine the identities of the clusters.</em></li>
-<li><em>To <strong>determine whether clusters represent true cell types or cluster due to biological or technical variation</strong>, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.</em></li>
+<li>*To <strong>generate cell type-specific clusters</strong> using k-nearest neighbor approach</li>
 </ul>
 <p>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected ‘quasi-cliques’ or ‘communities’ [<a href="https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html">Seurat - Guided Clustering Tutorial</a>]. A nice in-depth description of clustering methods is provided in the <a href="https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html">SVI Bioinformatics and Cellular Genomics Lab course</a>.</p>
 <p>The <code>resolution</code> is an important argument that sets the “granularity” of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <code>resolution</code> set between <code>0.4</code>-<code>1.4</code> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</p>
@@ -1312,16 +1325,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb17-313"><a href="#cb17-313" aria-hidden="true" tabindex="-1"></a>We want to identify ***cell types which are present in all samples/conditions/modalities*** within our dataset, and therefore would like to observe a representation of cells from both samples/conditions/modalities in every cluster. This will enable more interpretable results downstream (i.e. DE analysis, ligand-receptor analysis, differential abundance analysis...).</span>
 <span id="cb17-314"><a href="#cb17-314" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-315"><a href="#cb17-315" aria-hidden="true" tabindex="-1"></a><span class="fu">## Approaches for integration</span></span>
-<span id="cb17-316"><a href="#cb17-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-317"><a href="#cb17-317" aria-hidden="true" tabindex="-1"></a>To integrate, we will use the shared highly variable genes (identified using SCTransform) from each group, then, we will "integrate" or "harmonize" the groups to overlay cells that are similar or have a "common set of biological features" between groups. Integration is a powerful method that **uses these shared sources of greatest variation to identify shared subpopulations across conditions or datasets** <span class="sc">\[</span><span class="co">[</span><span class="ot">Stuart and Bulter et al. (2018)</span><span class="co">](https://www.biorxiv.org/content/early/2018/11/02/460147)</span><span class="sc">\]</span>. The goal of integration is to ensure that the cell types of one condition/dataset align with the same celltypes of the other conditions/datasets (e.g. macrophages in one sample align with macrophages in the other samples).</span>
-<span id="cb17-318"><a href="#cb17-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-319"><a href="#cb17-319" aria-hidden="true" tabindex="-1"></a><span class="fu">### Canonical Correlation Analysis (CCA)</span></span>
+<span id="cb17-316"><a href="#cb17-316" aria-hidden="true" tabindex="-1"></a>To align with the same celltypes of the other conditions/datasets (e.g. macrophages in one sample align with macrophages in the other samples), there are various methods that can be applied. Here, we discuss two common approaches used in the field.</span>
+<span id="cb17-317"><a href="#cb17-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-318"><a href="#cb17-318" aria-hidden="true" tabindex="-1"></a><span class="fu">### Canonical Correlation Analysis (CCA)</span></span>
+<span id="cb17-319"><a href="#cb17-319" aria-hidden="true" tabindex="-1"></a>CCA is a form of PCA, that **uses shared sources of greatest variation to identify shared subpopulations across conditions or datasets** <span class="sc">\[</span><span class="co">[</span><span class="ot">Stuart and Bulter et al. (2018)</span><span class="co">](https://www.biorxiv.org/content/early/2018/11/02/460147)</span><span class="sc">\]</span>. The shared highly variable genes from each dataset are used to form the intersection set, because they are the most likely to represent those genes distinguishing the different cell types present.</span>
 <span id="cb17-320"><a href="#cb17-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-321"><a href="#cb17-321" aria-hidden="true" tabindex="-1"></a>CCA is a form of PCA, in that it identifies the greatest sources of variation in the data, but only if it is shared or conserved across the conditions/groups (using the 3000 most variant genes from each sample). The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</span>
+<span id="cb17-321"><a href="#cb17-321" aria-hidden="true" tabindex="-1"></a>The shared highly variable genes are used to identify anchors or mutual nearest neighbors (MNNs) across datasets and incorrect anchors are filtered out. The anchors and corresponding scores are used to transform the cell expression values, allowing for the integration of the conditions/datasets.</span>
 <span id="cb17-322"><a href="#cb17-322" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-323"><a href="#cb17-323" aria-hidden="true" tabindex="-1"></a><span class="fu">### Harmony</span></span>
 <span id="cb17-324"><a href="#cb17-324" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-325"><a href="#cb17-325" aria-hidden="true" tabindex="-1"></a>Harmony was devleoped in 2019, and is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony applies a transformation to the principal component (PCs) values, using all available PCs, e.g. as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum "diversity".</span>
+<span id="cb17-325"><a href="#cb17-325" aria-hidden="true" tabindex="-1"></a>Harmony <span class="co">[</span><span class="ot">(Korsunsky et al. 2019</span><span class="co">](https://www.nature.com/articles/s41592-019-0619-0)</span>, is an example of a tool that can work with complex integration tasks (integrating across multiple covariates). Instead of using CCA, Harmony **applies a transformation to the principal component (PCs) values**, using all available PCs, e.g. as pre-computed within the Seurat workflow. In this space of transformed PCs, Harmony uses k-means clustering to delineate clusters, seeking to define clusters with maximum "diversity".</span>
 <span id="cb17-326"><a href="#cb17-326" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-327"><a href="#cb17-327" aria-hidden="true" tabindex="-1"></a>For this dataset, we applied CCA integration. To **evaluate the effect of integration**, we can visualize the aligned data in a UMAP to ensure we now have proper alignment across our samples.</span>
 <span id="cb17-328"><a href="#cb17-328" aria-hidden="true" tabindex="-1"></a></span>
@@ -1331,175 +1344,180 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb17-334"><a href="#cb17-334" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated)  </span>
 <span id="cb17-335"><a href="#cb17-335" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb17-336"><a href="#cb17-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-337"><a href="#cb17-337" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
-<span id="cb17-338"><a href="#cb17-338" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP split by sample</span></span>
-<span id="cb17-339"><a href="#cb17-339" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated,</span>
-<span id="cb17-340"><a href="#cb17-340" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"sample"</span>)  </span>
-<span id="cb17-341"><a href="#cb17-341" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-337"><a href="#cb17-337" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
+<span id="cb17-338"><a href="#cb17-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-339"><a href="#cb17-339" aria-hidden="true" tabindex="-1"></a>We could have plotted a PCA, however we can only plot two PCs at a time. In contrast, **UMAP will take the information from any number of top PCs** to arrange the cells in this multidimensional space. It will take those distances in multidimensional space and **plot them in two dimensions working to preserve local and global structure**. In this way, the distances between cells represent similarity in expression. If you wish to explore UMAP in more detail, <span class="co">[</span><span class="ot">this post</span><span class="co">](https://pair-code.github.io/understanding-umap/)</span> is a nice introduction to UMAP theory.</span>
+<span id="cb17-340"><a href="#cb17-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-341"><a href="#cb17-341" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb17-342"><a href="#cb17-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-343"><a href="#cb17-343" aria-hidden="true" tabindex="-1"></a><span class="fu"># Clustering cells</span></span>
-<span id="cb17-344"><a href="#cb17-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-345"><a href="#cb17-345" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
-<span id="cb17-346"><a href="#cb17-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-347"><a href="#cb17-347" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **generate cell type-specific clusters** and use known cell type marker genes to determine the identities of the clusters.*</span>
-<span id="cb17-348"><a href="#cb17-348" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*</span>
-<span id="cb17-349"><a href="#cb17-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-350"><a href="#cb17-350" aria-hidden="true" tabindex="-1"></a>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' <span class="sc">\[</span><span class="co">[</span><span class="ot">Seurat - Guided Clustering Tutorial</span><span class="co">](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)</span><span class="sc">\]</span>. A nice in-depth description of clustering methods is provided in the <span class="co">[</span><span class="ot">SVI Bioinformatics and Cellular Genomics Lab course</span><span class="co">](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html)</span>.</span>
-<span id="cb17-351"><a href="#cb17-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-352"><a href="#cb17-352" aria-hidden="true" tabindex="-1"></a>The <span class="in">`resolution`</span> is an important argument that sets the "granularity" of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <span class="in">`resolution`</span> set between <span class="in">`0.4`</span>-<span class="in">`1.4`</span> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</span>
-<span id="cb17-353"><a href="#cb17-353" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-354"><a href="#cb17-354" aria-hidden="true" tabindex="-1"></a>To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the <span class="co">[</span><span class="ot">UMAP method</span><span class="co">](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)</span> for **visualizing the clusters at a resolution of 0.8**.</span>
-<span id="cb17-355"><a href="#cb17-355" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-358"><a href="#cb17-358" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb17-359"><a href="#cb17-359" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign identity of clusters</span></span>
-<span id="cb17-360"><a href="#cb17-360" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/clustering_integrated_seurat.rds"</span>)</span>
-<span id="cb17-361"><a href="#cb17-361" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> seurat_clustered) <span class="ot">&lt;-</span> <span class="st">"integrated_snn_res.0.8"</span></span>
-<span id="cb17-362"><a href="#cb17-362" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-363"><a href="#cb17-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-364"><a href="#cb17-364" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
-<span id="cb17-365"><a href="#cb17-365" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_clustered,</span>
-<span id="cb17-366"><a href="#cb17-366" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>,</span>
-<span id="cb17-367"><a href="#cb17-367" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-368"><a href="#cb17-368" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">6</span>)</span>
-<span id="cb17-369"><a href="#cb17-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-370"><a href="#cb17-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-371"><a href="#cb17-371" aria-hidden="true" tabindex="-1"></a><span class="fu"># Cluster QC and identification of cell types</span></span>
-<span id="cb17-372"><a href="#cb17-372" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-373"><a href="#cb17-373" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
-<span id="cb17-374"><a href="#cb17-374" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-375"><a href="#cb17-375" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*</span>
-<span id="cb17-376"><a href="#cb17-376" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To use known cell type marker genes to **determine the identities of the clusters**.*</span>
+<span id="cb17-343"><a href="#cb17-343" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
+<span id="cb17-344"><a href="#cb17-344" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot UMAP split by sample</span></span>
+<span id="cb17-345"><a href="#cb17-345" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_integrated,</span>
+<span id="cb17-346"><a href="#cb17-346" aria-hidden="true" tabindex="-1"></a>        <span class="at">split.by =</span> <span class="st">"sample"</span>)  </span>
+<span id="cb17-347"><a href="#cb17-347" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-348"><a href="#cb17-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-349"><a href="#cb17-349" aria-hidden="true" tabindex="-1"></a><span class="fu"># Clustering cells</span></span>
+<span id="cb17-350"><a href="#cb17-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-351"><a href="#cb17-351" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
+<span id="cb17-352"><a href="#cb17-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-353"><a href="#cb17-353" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **generate cell type-specific clusters** using k-nearest neighbor approach</span>
+<span id="cb17-354"><a href="#cb17-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-355"><a href="#cb17-355" aria-hidden="true" tabindex="-1"></a>Seurat uses a graph-based clustering approach using a K-nearest neighbor approach, and then attempts to partition this graph into highly interconnected 'quasi-cliques' or 'communities' <span class="sc">\[</span><span class="co">[</span><span class="ot">Seurat - Guided Clustering Tutorial</span><span class="co">](https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html)</span><span class="sc">\]</span>. A nice in-depth description of clustering methods is provided in the <span class="co">[</span><span class="ot">SVI Bioinformatics and Cellular Genomics Lab course</span><span class="co">](https://biocellgen-public.svi.edu.au/mig_2019_scrnaseq-workshop/clustering-and-cell-annotation.html)</span>.</span>
+<span id="cb17-356"><a href="#cb17-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-357"><a href="#cb17-357" aria-hidden="true" tabindex="-1"></a>The <span class="in">`resolution`</span> is an important argument that sets the "granularity" of the downstream clustering and will need to be optimized for every individual experiment. For datasets of 3,000 - 5,000 cells, the <span class="in">`resolution`</span> set between <span class="in">`0.4`</span>-<span class="in">`1.4`</span> generally yields good clustering. Increased resolution values lead to a greater number of clusters, which is often required for larger datasets.</span>
+<span id="cb17-358"><a href="#cb17-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-359"><a href="#cb17-359" aria-hidden="true" tabindex="-1"></a>To visualize the cell clusters, there are a few different dimensionality reduction techniques that can be helpful that aim to place cells with similar local neighborhoods in high-dimensional space together in low-dimensional space. These methods will require you to input number of PCA dimentions to use for the visualization. Here, we will proceed with the <span class="co">[</span><span class="ot">UMAP method</span><span class="co">](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)</span> for **visualizing the clusters at a resolution of 0.8**.</span>
+<span id="cb17-360"><a href="#cb17-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-363"><a href="#cb17-363" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb17-364"><a href="#cb17-364" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign identity of clusters</span></span>
+<span id="cb17-365"><a href="#cb17-365" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/clustering_integrated_seurat.rds"</span>)</span>
+<span id="cb17-366"><a href="#cb17-366" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> seurat_clustered) <span class="ot">&lt;-</span> <span class="st">"integrated_snn_res.0.8"</span></span>
+<span id="cb17-367"><a href="#cb17-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-368"><a href="#cb17-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-369"><a href="#cb17-369" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb17-370"><a href="#cb17-370" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_clustered,</span>
+<span id="cb17-371"><a href="#cb17-371" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>,</span>
+<span id="cb17-372"><a href="#cb17-372" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-373"><a href="#cb17-373" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">6</span>)</span>
+<span id="cb17-374"><a href="#cb17-374" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-375"><a href="#cb17-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-376"><a href="#cb17-376" aria-hidden="true" tabindex="-1"></a><span class="fu"># Cluster QC and identification of cell types</span></span>
 <span id="cb17-377"><a href="#cb17-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-378"><a href="#cb17-378" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploration of QC metrics</span></span>
+<span id="cb17-378"><a href="#cb17-378" aria-hidden="true" tabindex="-1"></a>***Goals:***</span>
 <span id="cb17-379"><a href="#cb17-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-380"><a href="#cb17-380" aria-hidden="true" tabindex="-1"></a>Let's begin by using a **barplot** to take a look at the **number of cells per cluster**, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.</span>
-<span id="cb17-381"><a href="#cb17-381" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-382"><a href="#cb17-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15, fig.height=6}</span></span>
-<span id="cb17-383"><a href="#cb17-383" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract identity and sample information from seurat object to </span></span>
-<span id="cb17-384"><a href="#cb17-384" aria-hidden="true" tabindex="-1"></a><span class="co"># determine the number of cells per cluster per sample</span></span>
-<span id="cb17-385"><a href="#cb17-385" aria-hidden="true" tabindex="-1"></a>n_cells <span class="ot">&lt;-</span> <span class="fu">FetchData</span>(seurat_clustered, </span>
-<span id="cb17-386"><a href="#cb17-386" aria-hidden="true" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"ident"</span>, <span class="st">"sample"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb17-387"><a href="#cb17-387" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">count</span>(ident, sample)</span>
-<span id="cb17-388"><a href="#cb17-388" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-389"><a href="#cb17-389" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot of number of cells per cluster by sample</span></span>
-<span id="cb17-390"><a href="#cb17-390" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(n_cells, <span class="fu">aes</span>(<span class="at">x=</span>ident, <span class="at">y=</span>n, <span class="at">fill=</span>sample)) <span class="sc">+</span></span>
-<span id="cb17-391"><a href="#cb17-391" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="fu">position_dodge</span>(), <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb17-392"><a href="#cb17-392" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>n), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">2</span>, <span class="at">position=</span><span class="fu">position_dodge</span>(<span class="dv">1</span>))</span>
-<span id="cb17-393"><a href="#cb17-393" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-394"><a href="#cb17-394" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-395"><a href="#cb17-395" aria-hidden="true" tabindex="-1"></a>To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore various metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. If enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the particular cell type.</span>
-<span id="cb17-396"><a href="#cb17-396" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-397"><a href="#cb17-397" aria-hidden="true" tabindex="-1"></a>Next let's explore these metrics by overlaying them on the UMAP using a **FeaturePlot**:</span>
-<span id="cb17-398"><a href="#cb17-398" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-399"><a href="#cb17-399" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.height=10}</span></span>
-<span id="cb17-400"><a href="#cb17-400" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine metrics to plot present in seurat_integrated@meta.data</span></span>
-<span id="cb17-401"><a href="#cb17-401" aria-hidden="true" tabindex="-1"></a>metrics <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"nUMI"</span>, <span class="st">"nGene"</span>, <span class="st">"S.Score"</span>, <span class="st">"G2M.Score"</span>, <span class="st">"mitoRatio"</span>)</span>
-<span id="cb17-402"><a href="#cb17-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-403"><a href="#cb17-403" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
-<span id="cb17-404"><a href="#cb17-404" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
-<span id="cb17-405"><a href="#cb17-405" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> metrics,</span>
-<span id="cb17-406"><a href="#cb17-406" aria-hidden="true" tabindex="-1"></a>            <span class="at">pt.size =</span> <span class="fl">0.4</span>, </span>
-<span id="cb17-407"><a href="#cb17-407" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-408"><a href="#cb17-408" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>,</span>
-<span id="cb17-409"><a href="#cb17-409" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-410"><a href="#cb17-410" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-411"><a href="#cb17-411" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-412"><a href="#cb17-412" aria-hidden="true" tabindex="-1"></a>With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster and more **quantitatively assess the differences**. The corresponding UMAP is displayed for comparison.</span>
-<span id="cb17-413"><a href="#cb17-413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-416"><a href="#cb17-416" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb17-417"><a href="#cb17-417" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplot of nGene per cluster</span></span>
-<span id="cb17-418"><a href="#cb17-418" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seurat_clustered<span class="sc">@</span>meta.data) <span class="sc">+</span></span>
-<span id="cb17-419"><a href="#cb17-419" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>integrated_snn_res.<span class="fl">0.8</span>, <span class="at">y=</span>nGene, <span class="at">fill=</span>integrated_snn_res.<span class="fl">0.8</span>)) <span class="sc">+</span></span>
-<span id="cb17-420"><a href="#cb17-420" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NoLegend</span>()</span>
-<span id="cb17-421"><a href="#cb17-421" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-422"><a href="#cb17-422" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-423"><a href="#cb17-423" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploring known celltype markers</span></span>
-<span id="cb17-424"><a href="#cb17-424" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-425"><a href="#cb17-425" aria-hidden="true" tabindex="-1"></a>We can explore the different clusters and best identify their cell type identities by looking at expression of known marker genes. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. In teh example below, **CD14+ monocyte markers** appear to correspond to clusters 1, and 3. We wouldn't include clusters 14 and 10 because they do not highly express both of these markers.</span>
-<span id="cb17-426"><a href="#cb17-426" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-427"><a href="#cb17-427" aria-hidden="true" tabindex="-1"></a><span class="fu">### Feature Plot</span></span>
-<span id="cb17-428"><a href="#cb17-428" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-429"><a href="#cb17-429" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
-<span id="cb17-430"><a href="#cb17-430" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
-<span id="cb17-431"><a href="#cb17-431" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
-<span id="cb17-432"><a href="#cb17-432" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>), </span>
-<span id="cb17-433"><a href="#cb17-433" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-434"><a href="#cb17-434" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>, </span>
-<span id="cb17-435"><a href="#cb17-435" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-436"><a href="#cb17-436" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-437"><a href="#cb17-437" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-438"><a href="#cb17-438" aria-hidden="true" tabindex="-1"></a><span class="fu">### Violin plot</span></span>
-<span id="cb17-439"><a href="#cb17-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-440"><a href="#cb17-440" aria-hidden="true" tabindex="-1"></a>We can also explore the range in expression of specific markers by using **violin plots**. Violin plots are similar to box plots, except that they **also show the probability density of the data at different values**, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the **full distribution of the data**. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.</span>
-<span id="cb17-441"><a href="#cb17-441" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-442"><a href="#cb17-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=18, fig.height=6}</span></span>
-<span id="cb17-443"><a href="#cb17-443" aria-hidden="true" tabindex="-1"></a><span class="co"># Violin plot - CD14+ monocyte</span></span>
-<span id="cb17-444"><a href="#cb17-444" aria-hidden="true" tabindex="-1"></a><span class="fu">VlnPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
-<span id="cb17-445"><a href="#cb17-445" aria-hidden="true" tabindex="-1"></a>        <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>))</span>
-<span id="cb17-446"><a href="#cb17-446" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-447"><a href="#cb17-447" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-448"><a href="#cb17-448" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dotplot</span></span>
-<span id="cb17-449"><a href="#cb17-449" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-450"><a href="#cb17-450" aria-hidden="true" tabindex="-1"></a>While the above plot allows you to explore one celltype at a time, Seurat also has a built in **visualization tool which allows us to view the average expression of genes across clusters called DotPlot()**. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.</span>
-<span id="cb17-451"><a href="#cb17-451" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-452"><a href="#cb17-452" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15}</span></span>
-<span id="cb17-453"><a href="#cb17-453" aria-hidden="true" tabindex="-1"></a><span class="co"># List of known celltype markers</span></span>
-<span id="cb17-454"><a href="#cb17-454" aria-hidden="true" tabindex="-1"></a>markers <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb17-455"><a href="#cb17-455" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"CD14+ monocytes"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>)</span>
-<span id="cb17-456"><a href="#cb17-456" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"FCGR3A+ monocyte"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCGR3A"</span>, <span class="st">"MS4A7"</span>)</span>
-<span id="cb17-457"><a href="#cb17-457" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Macrophages"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"MARCO"</span>, <span class="st">"ITGAM"</span>, <span class="st">"ADGRE1"</span>)</span>
-<span id="cb17-458"><a href="#cb17-458" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Conventional dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCER1A"</span>, <span class="st">"CST3"</span>)</span>
-<span id="cb17-459"><a href="#cb17-459" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Plasmacytoid dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"IL3RA"</span>, <span class="st">"GZMB"</span>, <span class="st">"SERPINF1"</span>, <span class="st">"ITM2C"</span>)</span>
-<span id="cb17-460"><a href="#cb17-460" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-461"><a href="#cb17-461" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dotplot based on RNA expression</span></span>
-<span id="cb17-462"><a href="#cb17-462" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(seurat_clustered, markers, <span class="at">assay=</span><span class="st">"RNA"</span>)</span>
-<span id="cb17-463"><a href="#cb17-463" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-464"><a href="#cb17-464" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-465"><a href="#cb17-465" aria-hidden="true" tabindex="-1"></a><span class="fu">## Celltype assignment</span></span>
-<span id="cb17-466"><a href="#cb17-466" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-467"><a href="#cb17-467" aria-hidden="true" tabindex="-1"></a>After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers. Once we have identified the cell types, we can **assign the cell type names to each cluster**.</span>
-<span id="cb17-468"><a href="#cb17-468" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-469"><a href="#cb17-469" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=7}</span></span>
-<span id="cb17-470"><a href="#cb17-470" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename all identities</span></span>
-<span id="cb17-471"><a href="#cb17-471" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(<span class="at">object =</span> seurat_clustered, </span>
-<span id="cb17-472"><a href="#cb17-472" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"0"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
-<span id="cb17-473"><a href="#cb17-473" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>,</span>
-<span id="cb17-474"><a href="#cb17-474" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
-<span id="cb17-475"><a href="#cb17-475" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
-<span id="cb17-476"><a href="#cb17-476" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"Stressed cells / Unknown"</span>,</span>
-<span id="cb17-477"><a href="#cb17-477" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
-<span id="cb17-478"><a href="#cb17-478" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
-<span id="cb17-479"><a href="#cb17-479" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
-<span id="cb17-480"><a href="#cb17-480" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
-<span id="cb17-481"><a href="#cb17-481" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
-<span id="cb17-482"><a href="#cb17-482" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"10"</span> <span class="ot">=</span> <span class="st">"FCGR3A+ monocytes"</span>,</span>
-<span id="cb17-483"><a href="#cb17-483" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"11"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
-<span id="cb17-484"><a href="#cb17-484" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"12"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
-<span id="cb17-485"><a href="#cb17-485" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"13"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
-<span id="cb17-486"><a href="#cb17-486" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"14"</span> <span class="ot">=</span> <span class="st">"Conventional dendritic cells"</span>,</span>
-<span id="cb17-487"><a href="#cb17-487" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"15"</span> <span class="ot">=</span> <span class="st">"Megakaryocytes"</span>,</span>
-<span id="cb17-488"><a href="#cb17-488" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"16"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>, </span>
-<span id="cb17-489"><a href="#cb17-489" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"17"</span> <span class="ot">=</span> <span class="st">"Plasmacytoid dendritic cells"</span>,</span>
-<span id="cb17-490"><a href="#cb17-490" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"18"</span> <span class="ot">=</span> <span class="st">"Unknown"</span>)</span>
-<span id="cb17-491"><a href="#cb17-491" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-492"><a href="#cb17-492" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-493"><a href="#cb17-493" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
-<span id="cb17-494"><a href="#cb17-494" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
-<span id="cb17-495"><a href="#cb17-495" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
-<span id="cb17-496"><a href="#cb17-496" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-497"><a href="#cb17-497" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">3</span>,</span>
-<span id="cb17-498"><a href="#cb17-498" aria-hidden="true" tabindex="-1"></a>        <span class="at">repel =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-499"><a href="#cb17-499" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb17-500"><a href="#cb17-500" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-501"><a href="#cb17-501" aria-hidden="true" tabindex="-1"></a>After we have finished identifying cell types, often additional work is needed for validation or addressing additional questions. Some additional downstream work could include:</span>
-<span id="cb17-502"><a href="#cb17-502" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-503"><a href="#cb17-503" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Experimentally validate intriguing markers for our identified cell types.</span>
-<span id="cb17-504"><a href="#cb17-504" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Explore a subset of the cell types to discover subclusters of cells as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/seurat_subclustering.html)</span></span>
-<span id="cb17-505"><a href="#cb17-505" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Differential expression analysis within a particular cell type or subcluster.</span>
-<span id="cb17-506"><a href="#cb17-506" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Trajectory analysis, or lineage tracing, could be performed if trying to determine the progression between cell types or cell states. For example, we could explore any of the following using this type of analysis:</span>
-<span id="cb17-507"><a href="#cb17-507" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Differentiation processes</span>
-<span id="cb17-508"><a href="#cb17-508" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Expression changes over time</span>
-<span id="cb17-509"><a href="#cb17-509" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Cell state changes in expression</span>
+<span id="cb17-380"><a href="#cb17-380" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To **determine whether clusters represent true cell types or cluster due to biological or technical variation**, such as clusters of cells in the S phase of the cell cycle, clusters of specific batches, or cells with high mitochondrial content.*</span>
+<span id="cb17-381"><a href="#cb17-381" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>*To use known cell type marker genes to **determine the identities of the clusters**.*</span>
+<span id="cb17-382"><a href="#cb17-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-383"><a href="#cb17-383" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploration of QC metrics</span></span>
+<span id="cb17-384"><a href="#cb17-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-385"><a href="#cb17-385" aria-hidden="true" tabindex="-1"></a>Let's begin by using a **barplot** to take a look at the **number of cells per cluster**, and whether there are similar amounts of cells present from each of the conditions. Large differences observed could indicate compositional change between conditions and may warrant further downstream analysis.</span>
+<span id="cb17-386"><a href="#cb17-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-387"><a href="#cb17-387" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15, fig.height=6}</span></span>
+<span id="cb17-388"><a href="#cb17-388" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract identity and sample information from seurat object to </span></span>
+<span id="cb17-389"><a href="#cb17-389" aria-hidden="true" tabindex="-1"></a><span class="co"># determine the number of cells per cluster per sample</span></span>
+<span id="cb17-390"><a href="#cb17-390" aria-hidden="true" tabindex="-1"></a>n_cells <span class="ot">&lt;-</span> <span class="fu">FetchData</span>(seurat_clustered, </span>
+<span id="cb17-391"><a href="#cb17-391" aria-hidden="true" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"ident"</span>, <span class="st">"sample"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb17-392"><a href="#cb17-392" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">count</span>(ident, sample)</span>
+<span id="cb17-393"><a href="#cb17-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-394"><a href="#cb17-394" aria-hidden="true" tabindex="-1"></a><span class="co"># Barplot of number of cells per cluster by sample</span></span>
+<span id="cb17-395"><a href="#cb17-395" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(n_cells, <span class="fu">aes</span>(<span class="at">x=</span>ident, <span class="at">y=</span>n, <span class="at">fill=</span>sample)) <span class="sc">+</span></span>
+<span id="cb17-396"><a href="#cb17-396" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="fu">position_dodge</span>(), <span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb17-397"><a href="#cb17-397" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label=</span>n), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">2</span>, <span class="at">position=</span><span class="fu">position_dodge</span>(<span class="dv">1</span>))</span>
+<span id="cb17-398"><a href="#cb17-398" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-399"><a href="#cb17-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-400"><a href="#cb17-400" aria-hidden="true" tabindex="-1"></a>To determine whether our clusters might be due to artifacts such as cell cycle phase, mitochondrial expression, or junk, it can be useful to explore various metrics visually to see if any clusters exhibit enrichment or are different from the other clusters. If enrichment or differences are observed for particular clusters it may not be worrisome if it can be explained by the particular cell type.</span>
+<span id="cb17-401"><a href="#cb17-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-402"><a href="#cb17-402" aria-hidden="true" tabindex="-1"></a>Next let's explore these metrics by overlaying them on the UMAP using a **FeaturePlot**:</span>
+<span id="cb17-403"><a href="#cb17-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-404"><a href="#cb17-404" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.height=10}</span></span>
+<span id="cb17-405"><a href="#cb17-405" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine metrics to plot present in seurat_integrated@meta.data</span></span>
+<span id="cb17-406"><a href="#cb17-406" aria-hidden="true" tabindex="-1"></a>metrics <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"nUMI"</span>, <span class="st">"nGene"</span>, <span class="st">"S.Score"</span>, <span class="st">"G2M.Score"</span>, <span class="st">"mitoRatio"</span>)</span>
+<span id="cb17-407"><a href="#cb17-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-408"><a href="#cb17-408" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb17-409"><a href="#cb17-409" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb17-410"><a href="#cb17-410" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> metrics,</span>
+<span id="cb17-411"><a href="#cb17-411" aria-hidden="true" tabindex="-1"></a>            <span class="at">pt.size =</span> <span class="fl">0.4</span>, </span>
+<span id="cb17-412"><a href="#cb17-412" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-413"><a href="#cb17-413" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>,</span>
+<span id="cb17-414"><a href="#cb17-414" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-415"><a href="#cb17-415" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-416"><a href="#cb17-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-417"><a href="#cb17-417" aria-hidden="true" tabindex="-1"></a>With the color scale of the FeaturePlots, it can be difficult to distinguish the precise effect on individual clusters. Next, we use **boxplots** to zoom in on the number of genes expressed in each cluster and more **quantitatively assess the differences**. The corresponding UMAP is displayed for comparison.</span>
+<span id="cb17-418"><a href="#cb17-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-421"><a href="#cb17-421" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb17-422"><a href="#cb17-422" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplot of nGene per cluster</span></span>
+<span id="cb17-423"><a href="#cb17-423" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seurat_clustered<span class="sc">@</span>meta.data) <span class="sc">+</span></span>
+<span id="cb17-424"><a href="#cb17-424" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>integrated_snn_res.<span class="fl">0.8</span>, <span class="at">y=</span>nGene, <span class="at">fill=</span>integrated_snn_res.<span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb17-425"><a href="#cb17-425" aria-hidden="true" tabindex="-1"></a>    <span class="fu">NoLegend</span>()</span>
+<span id="cb17-426"><a href="#cb17-426" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-427"><a href="#cb17-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-428"><a href="#cb17-428" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploring known celltype markers</span></span>
+<span id="cb17-429"><a href="#cb17-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-430"><a href="#cb17-430" aria-hidden="true" tabindex="-1"></a>We can explore the different clusters and best identify their cell type identities by looking at expression of known marker genes. Depending on our markers of interest, they could be positive or negative markers for a particular cell type. The combined expression of our chosen handful of markers should give us an idea on whether a cluster corresponds to that particular cell type. In teh example below, **CD14+ monocyte markers** appear to correspond to clusters 1, and 3. We wouldn't include clusters 14 and 10 because they do not highly express both of these markers.</span>
+<span id="cb17-431"><a href="#cb17-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-432"><a href="#cb17-432" aria-hidden="true" tabindex="-1"></a><span class="fu">### Feature Plot</span></span>
+<span id="cb17-433"><a href="#cb17-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-434"><a href="#cb17-434" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=8}</span></span>
+<span id="cb17-435"><a href="#cb17-435" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seurat_clustered, </span>
+<span id="cb17-436"><a href="#cb17-436" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb17-437"><a href="#cb17-437" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>), </span>
+<span id="cb17-438"><a href="#cb17-438" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-439"><a href="#cb17-439" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>, </span>
+<span id="cb17-440"><a href="#cb17-440" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-441"><a href="#cb17-441" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-442"><a href="#cb17-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-443"><a href="#cb17-443" aria-hidden="true" tabindex="-1"></a><span class="fu">### Violin plot</span></span>
+<span id="cb17-444"><a href="#cb17-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-445"><a href="#cb17-445" aria-hidden="true" tabindex="-1"></a>We can also explore the range in expression of specific markers by using **violin plots**. Violin plots are similar to box plots, except that they **also show the probability density of the data at different values**, usually smoothed by a kernel density estimator. A violin plot is more informative than a plain box plot. While a box plot only shows summary statistics such as mean/median and interquartile ranges, the violin plot shows the **full distribution of the data**. The difference is particularly useful when the data distribution is multimodal (more than one peak). In this case a violin plot shows the presence of different peaks, their position and relative amplitude.</span>
+<span id="cb17-446"><a href="#cb17-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-447"><a href="#cb17-447" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=18, fig.height=6}</span></span>
+<span id="cb17-448"><a href="#cb17-448" aria-hidden="true" tabindex="-1"></a><span class="co"># Violin plot - CD14+ monocyte</span></span>
+<span id="cb17-449"><a href="#cb17-449" aria-hidden="true" tabindex="-1"></a><span class="fu">VlnPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb17-450"><a href="#cb17-450" aria-hidden="true" tabindex="-1"></a>        <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>))</span>
+<span id="cb17-451"><a href="#cb17-451" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-452"><a href="#cb17-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-453"><a href="#cb17-453" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dotplot</span></span>
+<span id="cb17-454"><a href="#cb17-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-455"><a href="#cb17-455" aria-hidden="true" tabindex="-1"></a>While the above plot allows you to explore one celltype at a time, Seurat also has a built in **visualization tool which allows us to view the average expression of genes across clusters called DotPlot()**. This function also shows us what percentage of cells within the cluster express the given gene (dot size). As input, we supply a list of genes - note that we cannot use the same gene twice or an error will be thrown.</span>
+<span id="cb17-456"><a href="#cb17-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-457"><a href="#cb17-457" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=15}</span></span>
+<span id="cb17-458"><a href="#cb17-458" aria-hidden="true" tabindex="-1"></a><span class="co"># List of known celltype markers</span></span>
+<span id="cb17-459"><a href="#cb17-459" aria-hidden="true" tabindex="-1"></a>markers <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb17-460"><a href="#cb17-460" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"CD14+ monocytes"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CD14"</span>, <span class="st">"LYZ"</span>)</span>
+<span id="cb17-461"><a href="#cb17-461" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"FCGR3A+ monocyte"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCGR3A"</span>, <span class="st">"MS4A7"</span>)</span>
+<span id="cb17-462"><a href="#cb17-462" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Macrophages"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"MARCO"</span>, <span class="st">"ITGAM"</span>, <span class="st">"ADGRE1"</span>)</span>
+<span id="cb17-463"><a href="#cb17-463" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Conventional dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FCER1A"</span>, <span class="st">"CST3"</span>)</span>
+<span id="cb17-464"><a href="#cb17-464" aria-hidden="true" tabindex="-1"></a>markers[[<span class="st">"Plasmacytoid dendritic"</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"IL3RA"</span>, <span class="st">"GZMB"</span>, <span class="st">"SERPINF1"</span>, <span class="st">"ITM2C"</span>)</span>
+<span id="cb17-465"><a href="#cb17-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-466"><a href="#cb17-466" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dotplot based on RNA expression</span></span>
+<span id="cb17-467"><a href="#cb17-467" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(seurat_clustered, markers, <span class="at">assay=</span><span class="st">"RNA"</span>)</span>
+<span id="cb17-468"><a href="#cb17-468" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-469"><a href="#cb17-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-470"><a href="#cb17-470" aria-hidden="true" tabindex="-1"></a><span class="fu">## Celltype assignment</span></span>
+<span id="cb17-471"><a href="#cb17-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-472"><a href="#cb17-472" aria-hidden="true" tabindex="-1"></a>After identifying the majority of clusters using known cell type markers, we can move on to marker identification, which will allow us to verify the identity of certain clusters and help surmise the identity of any unknown clusters. We can use the same plots to explore the expression of new markers as the known markers. Once we have identified the cell types, we can **assign the cell type names to each cluster**.</span>
+<span id="cb17-473"><a href="#cb17-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-474"><a href="#cb17-474" aria-hidden="true" tabindex="-1"></a><span class="in">```{r fig.width=7}</span></span>
+<span id="cb17-475"><a href="#cb17-475" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename all identities</span></span>
+<span id="cb17-476"><a href="#cb17-476" aria-hidden="true" tabindex="-1"></a>seurat_clustered <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb17-477"><a href="#cb17-477" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"0"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb17-478"><a href="#cb17-478" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>,</span>
+<span id="cb17-479"><a href="#cb17-479" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb17-480"><a href="#cb17-480" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"CD14+ monocytes"</span>,</span>
+<span id="cb17-481"><a href="#cb17-481" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"Stressed cells / Unknown"</span>,</span>
+<span id="cb17-482"><a href="#cb17-482" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb17-483"><a href="#cb17-483" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Naive or memory CD4+ T cells"</span>,</span>
+<span id="cb17-484"><a href="#cb17-484" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-485"><a href="#cb17-485" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb17-486"><a href="#cb17-486" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"CD8+ T cells"</span>,</span>
+<span id="cb17-487"><a href="#cb17-487" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"10"</span> <span class="ot">=</span> <span class="st">"FCGR3A+ monocytes"</span>,</span>
+<span id="cb17-488"><a href="#cb17-488" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"11"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-489"><a href="#cb17-489" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"12"</span> <span class="ot">=</span> <span class="st">"NK cells"</span>,</span>
+<span id="cb17-490"><a href="#cb17-490" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"13"</span> <span class="ot">=</span> <span class="st">"B cells"</span>,</span>
+<span id="cb17-491"><a href="#cb17-491" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"14"</span> <span class="ot">=</span> <span class="st">"Conventional dendritic cells"</span>,</span>
+<span id="cb17-492"><a href="#cb17-492" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"15"</span> <span class="ot">=</span> <span class="st">"Megakaryocytes"</span>,</span>
+<span id="cb17-493"><a href="#cb17-493" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"16"</span> <span class="ot">=</span> <span class="st">"Activated T cells"</span>, </span>
+<span id="cb17-494"><a href="#cb17-494" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"17"</span> <span class="ot">=</span> <span class="st">"Plasmacytoid dendritic cells"</span>,</span>
+<span id="cb17-495"><a href="#cb17-495" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"18"</span> <span class="ot">=</span> <span class="st">"Unknown"</span>)</span>
+<span id="cb17-496"><a href="#cb17-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-497"><a href="#cb17-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-498"><a href="#cb17-498" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the UMAP</span></span>
+<span id="cb17-499"><a href="#cb17-499" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(<span class="at">object =</span> seurat_clustered, </span>
+<span id="cb17-500"><a href="#cb17-500" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap"</span>, </span>
+<span id="cb17-501"><a href="#cb17-501" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-502"><a href="#cb17-502" aria-hidden="true" tabindex="-1"></a>        <span class="at">label.size =</span> <span class="dv">3</span>,</span>
+<span id="cb17-503"><a href="#cb17-503" aria-hidden="true" tabindex="-1"></a>        <span class="at">repel =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-504"><a href="#cb17-504" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-505"><a href="#cb17-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-506"><a href="#cb17-506" aria-hidden="true" tabindex="-1"></a>After we have finished identifying cell types, often additional work is needed for validation or addressing additional questions. Some additional downstream work could include:</span>
+<span id="cb17-507"><a href="#cb17-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-508"><a href="#cb17-508" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Experimentally validate intriguing markers for our identified cell types.</span>
+<span id="cb17-509"><a href="#cb17-509" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Explore a subset of the cell types to discover subclusters of cells as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://hbctraining.github.io/Intro-to-scRNAseq-Quarto/lessons/seurat_subclustering.html)</span></span>
+<span id="cb17-510"><a href="#cb17-510" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Differential expression analysis within a particular cell type or subcluster.</span>
+<span id="cb17-511"><a href="#cb17-511" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Trajectory analysis, or lineage tracing, could be performed if trying to determine the progression between cell types or cell states. For example, we could explore any of the following using this type of analysis:</span>
+<span id="cb17-512"><a href="#cb17-512" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Differentiation processes</span>
+<span id="cb17-513"><a href="#cb17-513" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Expression changes over time</span>
+<span id="cb17-514"><a href="#cb17-514" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Cell state changes in expression</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
